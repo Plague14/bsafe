@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+  # Anchor tests require Solana toolchain - run locally or in specialized runner
+  # anchor-test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Install Solana
+  #       run: sh -c "$(curl -sSfL https://release.solana.com/v1.18.18/install)"
+  #     - name: Install Anchor
+  #       run: cargo install --git https://github.com/coral-xyz/anchor anchor-cli
+  #     - name: Run tests
+  #       run: cd anchor && anchor test
