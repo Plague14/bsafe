@@ -1,0 +1,18 @@
+# Anchor build artifacts
+.anchor/
+target/
+
+# Keypairs and secrets - NEVER COMMIT!
+*.secret
+*-keypair.json
+deployer-keypair.json
+DEPLOYER_WALLET.secret
+
+# Keep program keypair for deployment reference, but not deployer keypair
+!target/deploy/bsafe-keypair.json.example
+
+# Node
+node_modules/
+
+# Test artifacts
+.test-ledger/

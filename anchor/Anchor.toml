@@ -1,0 +1,19 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+bsafe = "3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv"
+
+[programs.devnet]
+bsafe = "3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "./deployer-keypair.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

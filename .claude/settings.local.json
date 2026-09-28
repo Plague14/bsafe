@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b \"Z:\\\\HD_1\\\\DFK\\\\BSafe\\\\bsafe-clean\\\\bsafe-clean\\\\public\")",
+      "Bash(findstr:*)"
+    ]
+  }
+}
