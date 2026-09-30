@@ -39,13 +39,15 @@ pub fn add_signer(ctx: Context<AddSigner>, new_signer: Pubkey) -> Result<()> {
     // Initialize signer account
     signer_account.vault = vault.key();
     signer_account.signer = new_signer;
-    signer_account.index = vault.signer_count;
+    require!(vault.next_signer_index < 64, BsafeError::MaxSignersReached);
+    signer_account.index = vault.next_signer_index;
     signer_account.is_active = true;
     signer_account.added_at = clock.unix_timestamp;
     signer_account.bump = ctx.bumps.signer_account;
 
     // Update vault
     vault.signer_count += 1;
+    vault.next_signer_index += 1;
     if !vault.multisig_enabled && vault.signer_count > 1 {
         vault.multisig_enabled = true;
         vault.multisig_threshold = 2; // Default to requiring 2 signatures

@@ -34,7 +34,8 @@ pub fn create_vault(ctx: Context<CreateVault>, name: [u8; 32]) -> Result<()> {
     vault.beneficiary_count = 0;
     vault.multisig_enabled = false;
     vault.multisig_threshold = 1;
-    vault.signer_count = 1; // Owner is the first signer
+    // Counts MultisigSigner accounts only; the owner joins by adding their own wallet
+    vault.signer_count = 0;
     vault.last_activity = clock.unix_timestamp;
     vault.created_at = clock.unix_timestamp;
     vault.bump = ctx.bumps.vault;

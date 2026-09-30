@@ -53,8 +53,12 @@ pub struct Vault {
     /// Total share allocation in basis points (should sum to 10000 for 100%)
     pub total_share_bps: u16,
 
+    /// Monotonic index for the next multisig signer (approval bitmask position).
+    /// Never reused after a signer is removed, so approval bits can't collide.
+    pub next_signer_index: u8,
+
     /// Reserved space for future upgrades
-    pub _reserved: [u8; 30],
+    pub _reserved: [u8; 29],
     pub _reserved2: [u8; 32],
 }
 
@@ -72,7 +76,8 @@ impl Vault {
         8 +  // created_at
         1 +  // bump
         2 +  // total_share_bps
-        30 + // reserved
+        1 +  // next_signer_index
+        29 + // reserved
         32;  // reserved2
 
     pub fn update_activity(&mut self) {

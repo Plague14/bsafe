@@ -273,6 +273,14 @@ pub fn add_signer(vault: &Pubkey, owner: &Pubkey, new_signer: &Pubkey) -> Instru
     )
 }
 
+pub fn remove_signer(vault: &Pubkey, owner: &Pubkey, signer: &Pubkey) -> Instruction {
+    ix("remove_signer", &[], vec![w(*vault), w(signer_pda(vault, signer)), ws(*owner)])
+}
+
+pub fn update_threshold(vault: &Pubkey, owner: &Pubkey, threshold: u8) -> Instruction {
+    ix("update_threshold", &[threshold], vec![w(*vault), rs(*owner)])
+}
+
 /// Proposes a withdrawal. `vault_balance` is the vault's tracked balance (used as PDA nonce).
 pub fn propose_withdrawal(
     vault: &Pubkey,

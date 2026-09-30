@@ -225,6 +225,43 @@ fn owner_cannot_cancel_after_cooldown() {
 }
 
 #[test]
+fn multisig_counts_only_real_signers() {
+    let Setup { mut env, owner, vault } = setup_vault(1);
+    let cosigner = env.funded(1);
+
+    // Adding a single co-signer must not enable multisig: the owner has no signer
+    // account, so a 2-of-2 requirement could never be met and funds would be stuck.
+    env.ok(&[add_signer(&vault, &owner.pubkey(), &cosigner.pubkey())], &[&owner]);
+    let dest = Keypair::new().pubkey();
+    env.ok(&[withdraw(&vault, &owner.pubkey(), &dest, SOL / 10)], &[&owner]);
+
+    // Threshold can never exceed the number of real signers
+    env.fails_with(&[update_threshold(&vault, &owner.pubkey(), 2)], &[&owner], "InvalidThreshold");
+}
+
+#[test]
+fn multisig_signer_index_not_reused_after_removal() {
+    let Setup { mut env, owner, vault } = setup_vault(2);
+    let a = env.funded(1);
+    let b = env.funded(1);
+    let c = env.funded(1);
+
+    env.ok(&[add_signer(&vault, &owner.pubkey(), &a.pubkey())], &[&owner]);
+    env.ok(&[add_signer(&vault, &owner.pubkey(), &b.pubkey())], &[&owner]);
+    env.ok(&[remove_signer(&vault, &owner.pubkey(), &a.pubkey())], &[&owner]);
+    env.ok(&[add_signer(&vault, &owner.pubkey(), &c.pubkey())], &[&owner]);
+
+    // B proposes (auto-approves); C must be able to add the second, distinct approval
+    let dest = Keypair::new().pubkey();
+    let balance = env.vault_balance(&vault);
+    let tx = multisig_tx_pda(&vault, balance);
+    env.ok(&[propose_withdrawal(&vault, &b.pubkey(), balance, SOL, &dest)], &[&b]);
+    env.ok(&[approve_transaction(&vault, &c.pubkey(), &tx)], &[&c]);
+    env.ok(&[execute_transaction(&vault, &b.pubkey(), &tx, &dest)], &[&b]);
+    assert_eq!(env.balance(&dest), SOL);
+}
+
+#[test]
 fn multisig_withdrawal_requires_threshold() {
     let Setup { mut env, owner, vault } = setup_vault(2);
     let cosigner = env.funded(1);
