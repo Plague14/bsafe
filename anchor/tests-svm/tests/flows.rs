@@ -205,6 +205,39 @@ fn death_certificate_flow_and_owner_cancel() {
 }
 
 #[test]
+fn cancel_invalidates_death_certificate() {
+    let Setup { mut env, owner, vault } = setup_vault(2);
+    let heir = env.funded(1);
+    let verifier = env.funded(1);
+    env.ok(&[add_beneficiary(&vault, &owner.pubkey(), &heir.pubkey(), 10_000)], &[&owner]);
+    env.ok(
+        &[create_inheritance_plan(&vault, &owner.pubkey(), TriggerType::DeathCertificate, 7 * DAY as u64, 90 * DAY as u64, 1)],
+        &[&owner],
+    );
+    env.ok(&[add_verifier(&vault, &owner.pubkey(), &verifier.pubkey())], &[&owner]);
+    env.ok(&[submit_death_certificate(&vault, &heir.pubkey(), [1u8; 32])], &[&heir]);
+    env.ok(&[verify_death_certificate(&vault, &verifier.pubkey())], &[&verifier]);
+    env.ok(&[initiate_inheritance(&vault, &heir.pubkey(), true)], &[&heir]);
+
+    // Owner is alive: cancels and re-arms the plan
+    env.ok(&[cancel_inheritance(&vault, &owner.pubkey())], &[&owner]);
+    env.ok(&[reset_inheritance_plan(&vault, &owner.pubkey())], &[&owner]);
+    assert!(env.svm.get_account(&proof_pda(&inheritance_pda(&vault))).map_or(true, |a| a.lamports == 0));
+
+    // The refuted certificate can no longer trigger inheritance
+    env.fails_with(&[initiate_inheritance(&vault, &heir.pubkey(), true)], &[&heir], "AccountNotInitialized");
+    env.fails_with(&[initiate_inheritance(&vault, &heir.pubkey(), false)], &[&heir], "ProofNotVerified");
+
+    // A new certificate can be submitted and verified by the same verifier
+    env.warp_forward(DAY);
+    env.ok(&[submit_death_certificate(&vault, &heir.pubkey(), [2u8; 32])], &[&heir]);
+    env.ok(&[verify_death_certificate(&vault, &verifier.pubkey())], &[&verifier]);
+    env.fails_with(&[verify_death_certificate(&vault, &verifier.pubkey())], &[&verifier], "ProofNotVerified");
+    env.ok(&[initiate_inheritance(&vault, &heir.pubkey(), true)], &[&heir]);
+    assert_eq!(env.plan_status(&vault), InheritanceStatus::CooldownActive as u8);
+}
+
+#[test]
 fn owner_cannot_cancel_after_cooldown() {
     let Setup { mut env, owner, vault } = setup_vault(1);
     let heir = env.funded(1);

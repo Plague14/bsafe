@@ -18,7 +18,19 @@ pub struct CancelInheritance<'info> {
     )]
     pub inheritance_plan: Account<'info, InheritancePlan>,
 
+    /// CHECK: Death certificate proof PDA (may not exist). If present it is closed, so a
+    /// certificate the owner refuted by cancelling can't be reused to re-trigger inheritance.
+    #[account(
+        mut,
+        seeds = [b"proof", inheritance_plan.key().as_ref()],
+        bump
+    )]
+    pub proof: UncheckedAccount<'info>,
+
+    #[account(mut)]
     pub owner: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
 }
 
 pub fn cancel_inheritance(ctx: Context<CancelInheritance>) -> Result<()> {
@@ -31,6 +43,16 @@ pub fn cancel_inheritance(ctx: Context<CancelInheritance>) -> Result<()> {
         clock.unix_timestamp < plan.cooldown_ends_at,
         BsafeError::CooldownEnded
     );
+
+    // Invalidate the death certificate (rent goes to the owner)
+    let proof = ctx.accounts.proof.to_account_info();
+    if proof.owner == ctx.program_id && proof.lamports() > 0 {
+        let owner = ctx.accounts.owner.to_account_info();
+        **owner.try_borrow_mut_lamports()? += proof.lamports();
+        **proof.try_borrow_mut_lamports()? = 0;
+        proof.assign(&anchor_lang::system_program::ID);
+        proof.realloc(0, false)?;
+    }
 
     // Reset inheritance plan
     plan.status = InheritanceStatus::Cancelled;

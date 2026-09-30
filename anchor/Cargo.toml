@@ -8,7 +8,7 @@ resolver = "2"
 overflow-checks = true
 # Optimize for size: keeps the .so within the deployed program's allocated length,
 # so devnet upgrades don't need an `extend` (and less buffer rent).
-opt-level = "s"
+opt-level = "z"
 lto = "fat"
 codegen-units = 1
 

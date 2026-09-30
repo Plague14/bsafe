@@ -254,7 +254,16 @@ pub fn claim_inheritance(vault: &Pubkey, claimer: &Pubkey) -> Instruction {
 }
 
 pub fn cancel_inheritance(vault: &Pubkey, owner: &Pubkey) -> Instruction {
-    ix("cancel_inheritance", &[], vec![w(*vault), w(inheritance_pda(vault)), rs(*owner)])
+    let plan = inheritance_pda(vault);
+    ix(
+        "cancel_inheritance",
+        &[],
+        vec![w(*vault), w(plan), w(proof_pda(&plan)), ws(*owner), r(system_program())],
+    )
+}
+
+pub fn reset_inheritance_plan(vault: &Pubkey, owner: &Pubkey) -> Instruction {
+    ix("reset_inheritance_plan", &[], vec![w(*vault), w(inheritance_pda(vault)), rs(*owner)])
 }
 
 pub fn initialize_treasury(authority: &Pubkey) -> Instruction {

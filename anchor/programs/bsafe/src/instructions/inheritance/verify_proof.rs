@@ -29,7 +29,9 @@ pub struct VerifyDeathCertificate<'info> {
         mut,
         constraint = verifier_account.inheritance_plan == inheritance_plan.key() @ BsafeError::InvalidAccount,
         constraint = verifier_account.verifier == verifier.key() @ BsafeError::UnauthorizedVerifier,
-        constraint = !verifier_account.has_verified @ BsafeError::AlreadyVerified
+        // A verifier may verify again only for a newer proof (after the owner cancelled)
+        constraint = !verifier_account.has_verified || verifier_account.verified_at < proof.submitted_at
+            @ BsafeError::AlreadyVerified
     )]
     pub verifier_account: Account<'info, Verifier>,
 
