@@ -59,9 +59,10 @@ export function findSignerPDA(vault: PublicKey, signer: PublicKey): [PublicKey, 
   );
 }
 
-export function findMultisigTxPDA(vault: PublicKey, nonce: number): [PublicKey, number] {
+/** Multisig proposal PDA; the program uses `vault.balance + 1` (lamports) as the nonce. */
+export function findMultisigTxPDA(vault: PublicKey, nonce: bigint): [PublicKey, number] {
   const nonceBuffer = Buffer.alloc(8);
-  nonceBuffer.writeBigUInt64LE(BigInt(nonce));
+  nonceBuffer.writeBigUInt64LE(nonce);
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEEDS.MULTISIG_TX), vault.toBuffer(), nonceBuffer],
     PROGRAM_ID

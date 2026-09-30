@@ -1,11 +1,14 @@
 import { PublicKey } from '@solana/web3.js';
 
 // BSafe Program ID (Devnet)
-export const PROGRAM_ID = new PublicKey('3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv');
+export const PROGRAM_ID = new PublicKey(
+  import.meta.env.VITE_PROGRAM_ID || '3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv'
+);
 
 // Network Configuration
 export const NETWORK = 'devnet';
-export const RPC_ENDPOINT = 'https://api.devnet.solana.com';
+// The public devnet RPC is rate-limited; set VITE_RPC_URL (e.g. a Helius/QuickNode devnet URL) for demos
+export const RPC_ENDPOINT = import.meta.env.VITE_RPC_URL || 'https://api.devnet.solana.com';
 
 // PDA Seeds
 export const SEEDS = {

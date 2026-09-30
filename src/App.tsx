@@ -10,11 +10,13 @@ import { AssetsPage } from './pages/dashboard/AssetsPage';
 import { MessagesPage } from './pages/dashboard/MessagesPage';
 import { PlansPage } from './pages/dashboard/PlansPage';
 import { SettingsPage } from './pages/dashboard/SettingsPage';
+import { MultisigPage } from './pages/dashboard/MultisigPage';
+import { InheritancesPage } from './pages/dashboard/InheritancesPage';
 
 export default function App() {
   return (
     <WalletProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -29,6 +31,8 @@ export default function App() {
             <Route path="assets" element={<AssetsPage />} />
             <Route path="messages" element={<MessagesPage />} />
             <Route path="plans" element={<PlansPage />} />
+            <Route path="multisig" element={<MultisigPage />} />
+            <Route path="inheritances" element={<InheritancesPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
 

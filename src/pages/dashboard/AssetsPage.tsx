@@ -3,16 +3,21 @@ import { Plus, ArrowDownRight, ArrowUpRight, Copy, Check, ExternalLink, RefreshC
 import { Card, Button, Input, Modal } from '../../components/ui';
 import { useProgram, type Vault } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
+import { Link } from 'react-router-dom';
 
 export function AssetsPage() {
   const { publicKey } = useWallet();
-  const { getVaults, createVault, depositToVault, loading, error } = useProgram();
+  const { getVaults, createVault, depositToVault, withdrawFromVault, loading, error } = useProgram();
 
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState<Vault | null>(null);
   const [vaultName, setVaultName] = useState('');
   const [depositAmount, setDepositAmount] = useState('');
+  const [showWithdrawModal, setShowWithdrawModal] = useState<Vault | null>(null);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawDestination, setWithdrawDestination] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -54,6 +59,35 @@ export function AssetsPage() {
       await refreshVaults();
     }
   };
+
+  const openWithdraw = (vault: Vault) => {
+    setWithdrawAmount('');
+    setWithdrawDestination(publicKey?.toBase58() ?? '');
+    setShowWithdrawModal(vault);
+  };
+
+  const parseDestination = (value: string): PublicKey | null => {
+    try {
+      return new PublicKey(value.trim());
+    } catch {
+      return null;
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!showWithdrawModal) return;
+    const amount = parseFloat(withdrawAmount);
+    const destination = parseDestination(withdrawDestination);
+    if (isNaN(amount) || amount <= 0 || !destination) return;
+
+    const signature = await withdrawFromVault(showWithdrawModal.address, amount, destination);
+    if (signature) {
+      setShowWithdrawModal(null);
+      await refreshVaults();
+    }
+  };
+
+  const requiresMultisig = (vault: Vault) => vault.multisigEnabled && vault.multisigThreshold > 1;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -204,6 +238,8 @@ export function AssetsPage() {
                 <Button
                   size="sm"
                   variant="secondary"
+                  onClick={() => openWithdraw(vault)}
+                  disabled={vault.status !== 'active'}
                   icon={<ArrowUpRight className="w-4 h-4" />}
                 >
                   Sacar
@@ -300,6 +336,76 @@ export function AssetsPage() {
             </div>
           )}
         </div>
+      </Modal>
+      {/* Withdraw Modal */}
+      <Modal
+        isOpen={!!showWithdrawModal}
+        onClose={() => setShowWithdrawModal(null)}
+        title={`Sacar de ${showWithdrawModal?.name || 'Vault'}`}
+        footer={
+          showWithdrawModal && requiresMultisig(showWithdrawModal) ? (
+            <div className="flex gap-3 justify-end">
+              <Button variant="secondary" onClick={() => setShowWithdrawModal(null)}>
+                Fechar
+              </Button>
+              <Link to="/dashboard/multisig">
+                <Button>Ir para Multisig</Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex gap-3 justify-end">
+              <Button variant="secondary" onClick={() => setShowWithdrawModal(null)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleWithdraw}
+                disabled={
+                  loading ||
+                  !(parseFloat(withdrawAmount) > 0) ||
+                  parseFloat(withdrawAmount) > (showWithdrawModal?.balance ?? 0) ||
+                  !parseDestination(withdrawDestination)
+                }
+              >
+                {loading ? 'Sacando...' : 'Sacar'}
+              </Button>
+            </div>
+          )
+        }
+      >
+        {showWithdrawModal && requiresMultisig(showWithdrawModal) ? (
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+            Este vault usa multisig ({showWithdrawModal.multisigThreshold} de {showWithdrawModal.signerCount} assinaturas).
+            Saques precisam ser propostos e aprovados pelos signatários na página Multisig.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <Input
+              label="Quantidade (SOL)"
+              type="number"
+              value={withdrawAmount}
+              onChange={e => setWithdrawAmount(e.target.value)}
+              placeholder="0.00"
+              step="0.001"
+              min="0"
+              hint={showWithdrawModal ? `Disponível: ${showWithdrawModal.balance.toFixed(4)} SOL` : undefined}
+              error={
+                parseFloat(withdrawAmount) > (showWithdrawModal?.balance ?? 0)
+                  ? 'Valor maior que o saldo do vault'
+                  : undefined
+              }
+            />
+            <Input
+              label="Carteira de destino"
+              value={withdrawDestination}
+              onChange={e => setWithdrawDestination(e.target.value)}
+              placeholder="Endereço Solana"
+              error={withdrawDestination && !parseDestination(withdrawDestination) ? 'Endereço inválido' : undefined}
+            />
+            <p className="text-xs text-gray-500">
+              Sacar registra atividade no vault e reinicia a contagem do deadman switch.
+            </p>
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Users, ExternalLink, Copy, Check, RefreshCw, Wallet, AlertTriangle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Users, ExternalLink, Copy, Check, RefreshCw, Wallet, AlertTriangle } from 'lucide-react';
 import { Card, Button, Input, Modal } from '../../components/ui';
 import { useProgram, type Vault, type Beneficiary } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 
 export function BeneficiariesPage() {
   const { publicKey } = useWallet();
-  const { getVaults, getBeneficiaries, addBeneficiary, updateBeneficiaryShares, loading, error } = useProgram();
+  const { getVaults, getBeneficiaries, addBeneficiary, updateBeneficiaryShares, removeBeneficiary, loading, error } = useProgram();
 
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
@@ -99,6 +99,14 @@ export function BeneficiariesPage() {
     }
   };
 
+  const handleRemoveBeneficiary = async (beneficiary: Beneficiary) => {
+    if (!selectedVault) return;
+    if (!window.confirm('Remover este herdeiro? A parte dele volta a ficar disponível para redistribuir.')) return;
+    if (await removeBeneficiary(selectedVault.address, beneficiary.wallet)) {
+      await refreshBeneficiaries();
+    }
+  };
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(text);
@@ -124,6 +132,13 @@ export function BeneficiariesPage() {
             <p className="text-gray-500">Gerencie quem receberá seus ativos</p>
           </div>
         </div>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between gap-4">
+            <span>{error}</span>
+            <Button size="sm" variant="secondary" onClick={refreshVaults}>Tentar de novo</Button>
+          </div>
+        )}
 
         <Card className="text-center py-12">
           <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -292,6 +307,14 @@ export function BeneficiariesPage() {
                     className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
                   >
                     <Edit2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleRemoveBeneficiary(beneficiary)}
+                    disabled={loading}
+                    className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    title="Remover herdeiro"
+                  >
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>

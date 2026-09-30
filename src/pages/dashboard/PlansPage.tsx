@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Clock, FileText, Users, AlertTriangle, Shield, Wallet, RefreshCw, Play, XCircle, CheckCircle, Timer } from 'lucide-react';
+import { Plus, Clock, FileText, Users, AlertTriangle, Shield, Wallet, RefreshCw, Play, XCircle, CheckCircle, Timer, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Card, Button, Modal } from '../../components/ui';
-import { useProgram, type Vault, type InheritancePlan, type TriggerType, type Beneficiary } from '../../hooks/useProgram';
+import { Card, Button, Input, Modal } from '../../components/ui';
+import { useProgram, type Vault, type InheritancePlan, type TriggerType, type Beneficiary, type Verifier } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
 
 export function PlansPage() {
   const { publicKey } = useWallet();
@@ -15,6 +16,9 @@ export function PlansPage() {
     cancelInheritance,
     claimInheritance,
     getBeneficiaries,
+    getVerifiers,
+    addVerifier,
+    resetInheritancePlan,
     loading,
     error
   } = useProgram();
@@ -23,6 +27,9 @@ export function PlansPage() {
   const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
   const [inheritancePlan, setInheritancePlan] = useState<InheritancePlan | null>(null);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+  const [verifiers, setVerifiers] = useState<Verifier[]>([]);
+  const [showVerifierModal, setShowVerifierModal] = useState(false);
+  const [verifierAddress, setVerifierAddress] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInitiateModal, setShowInitiateModal] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
@@ -65,7 +72,26 @@ export function PlansPage() {
     setRefreshing(true);
     const plan = await getInheritancePlan(selectedVault.address);
     setInheritancePlan(plan);
+    setVerifiers(plan ? await getVerifiers(selectedVault.address) : []);
     setRefreshing(false);
+  };
+
+  const parsedVerifier = (() => {
+    try {
+      return new PublicKey(verifierAddress.trim());
+    } catch {
+      return null;
+    }
+  })();
+
+  const handleAddVerifier = async () => {
+    if (!selectedVault || !parsedVerifier) return;
+    const sig = await addVerifier(selectedVault.address, parsedVerifier);
+    if (sig) {
+      setShowVerifierModal(false);
+      setVerifierAddress('');
+      await refreshInheritancePlan();
+    }
   };
 
   const refreshBeneficiaries = async () => {
@@ -111,6 +137,13 @@ export function PlansPage() {
     if (result) {
       await refreshInheritancePlan();
       await refreshVaults();
+    }
+  };
+
+  const handleResetPlan = async () => {
+    if (!selectedVault) return;
+    if (await resetInheritancePlan(selectedVault.address)) {
+      await refreshInheritancePlan();
     }
   };
 
@@ -211,6 +244,13 @@ export function PlansPage() {
             <p className="text-gray-500">Configure como seus ativos serão transferidos</p>
           </div>
         </div>
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between gap-4">
+            <span>{error}</span>
+            <Button size="sm" variant="secondary" onClick={refreshVaults}>Tentar de novo</Button>
+          </div>
+        )}
 
         <Card className="text-center py-12">
           <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -350,6 +390,16 @@ export function PlansPage() {
                   {loading ? 'Cancelando...' : 'Provar Vida (Cancelar)'}
                 </Button>
               )}
+              {inheritancePlan.status === 'cancelled' && selectedVault?.owner.toBase58() === publicKey?.toBase58() && (
+                <Button
+                  size="sm"
+                  onClick={handleResetPlan}
+                  disabled={loading}
+                  icon={<RefreshCw className="w-4 h-4" />}
+                >
+                  {loading ? 'Reativando...' : 'Reativar plano'}
+                </Button>
+              )}
               {canClaim && (
                 <Button
                   size="sm"
@@ -445,6 +495,51 @@ export function PlansPage() {
               </div>
             </Card>
           </div>
+
+          {/* Verifiers (death certificate trigger) */}
+          {inheritancePlan.triggerType !== 'deadmanSwitch' && (
+            <Card
+              header={
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-900">Verificadores da certidão</span>
+                  {inheritancePlan.status === 'configured' && (
+                    <Button size="sm" onClick={() => setShowVerifierModal(true)} icon={<Plus className="w-4 h-4" />}>
+                      Adicionar
+                    </Button>
+                  )}
+                </div>
+              }
+            >
+              {verifiers.length < inheritancePlan.requiredVerifications && (
+                <p className="mb-3 text-sm text-amber-700 bg-amber-50 p-3 rounded-lg">
+                  O plano exige {inheritancePlan.requiredVerifications} verificação(ões), mas há {verifiers.length} verificador(es).
+                  Sem verificadores suficientes a certidão nunca poderá ser confirmada.
+                </p>
+              )}
+              {verifiers.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  Verificadores (advogado, cartório, familiar de confiança) confirmam a certidão de óbito enviada por um herdeiro.
+                </p>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {verifiers.map(v => (
+                    <li key={v.address.toBase58()} className="py-3 flex items-center justify-between text-sm">
+                      <code className="text-gray-700">
+                        {v.verifier.toBase58().slice(0, 6)}...{v.verifier.toBase58().slice(-6)}
+                      </code>
+                      {v.hasVerified ? (
+                        <span className="flex items-center gap-1 text-emerald-700">
+                          <ShieldCheck className="w-4 h-4" /> Verificou
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">Aguardando</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          )}
 
           {/* Distribution Preview */}
           {inheritancePlan.distributionAmount > 0 && (
@@ -796,6 +891,33 @@ export function PlansPage() {
             </div>
           </div>
         )}
+      </Modal>
+      {/* Add Verifier Modal */}
+      <Modal
+        isOpen={showVerifierModal}
+        onClose={() => setShowVerifierModal(false)}
+        title="Adicionar verificador"
+        footer={
+          <div className="flex gap-3 justify-end">
+            <Button variant="secondary" onClick={() => setShowVerifierModal(false)}>Cancelar</Button>
+            <Button onClick={handleAddVerifier} disabled={loading || !parsedVerifier}>
+              {loading ? 'Adicionando...' : 'Adicionar'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <Input
+            label="Carteira do verificador"
+            value={verifierAddress}
+            onChange={e => setVerifierAddress(e.target.value)}
+            placeholder="Endereço Solana"
+            error={verifierAddress && !parsedVerifier ? 'Endereço inválido' : undefined}
+          />
+          <p className="text-xs text-gray-500">
+            O verificador vê a certidão pendente em "Minhas Heranças" e confirma on-chain.
+          </p>
+        </div>
       </Modal>
     </div>
   );

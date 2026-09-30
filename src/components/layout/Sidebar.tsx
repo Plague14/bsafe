@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Wallet, MessageSquare, CreditCard, Settings, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, MessageSquare, CreditCard, Settings, X, LogOut, KeyRound, Gift } from 'lucide-react';
 import { useStore } from '../../store';
 import clsx from 'clsx';
 
@@ -8,7 +8,9 @@ const navItems = [
   { to: '/dashboard/beneficiaries', icon: Users, label: 'Herdeiros' },
   { to: '/dashboard/assets', icon: Wallet, label: 'Ativos' },
   { to: '/dashboard/messages', icon: MessageSquare, label: 'Mensagens' },
-  { to: '/dashboard/plans', icon: CreditCard, label: 'Planos' },
+  { to: '/dashboard/plans', icon: CreditCard, label: 'Plano de Herança' },
+  { to: '/dashboard/multisig', icon: KeyRound, label: 'Multisig' },
+  { to: '/dashboard/inheritances', icon: Gift, label: 'Minhas Heranças' },
   { to: '/dashboard/settings', icon: Settings, label: 'Configurações' },
 ];
 

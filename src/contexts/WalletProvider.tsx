@@ -1,7 +1,7 @@
 import { useMemo, type FC, type ReactNode } from 'react';
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { PhantomWalletAdapter, SolflareWalletAdapter, UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { RPC_ENDPOINT } from '../lib/constants';
 
 // Import wallet adapter styles
@@ -16,6 +16,8 @@ export const WalletProvider: FC<Props> = ({ children }) => {
     () => [
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
+      // In-browser throwaway keypair for local testing only; never shipped in production builds
+      ...(import.meta.env.DEV ? [new UnsafeBurnerWalletAdapter()] : []),
     ],
     []
   );
