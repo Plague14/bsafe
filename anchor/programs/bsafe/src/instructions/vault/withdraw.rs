@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::state::{Vault, VaultStatus};
 use crate::errors::BsafeError;
+use crate::utils::transfer_from_vault_treasury;
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
@@ -41,16 +42,14 @@ pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         BsafeError::ThresholdNotReached);
 
     // Transfer SOL from vault treasury PDA
-    let vault_key = vault.key();
-    let seeds = &[
-        b"vault_treasury",
-        vault_key.as_ref(),
-        &[ctx.bumps.vault_treasury],
-    ];
-    let signer_seeds = &[&seeds[..]];
-
-    **ctx.accounts.vault_treasury.try_borrow_mut_lamports()? -= amount;
-    **ctx.accounts.destination.try_borrow_mut_lamports()? += amount;
+    transfer_from_vault_treasury(
+        &ctx.accounts.vault_treasury,
+        &ctx.accounts.destination,
+        &ctx.accounts.system_program.to_account_info(),
+        &vault.key(),
+        ctx.bumps.vault_treasury,
+        amount,
+    )?;
 
     // Update vault balance tracking
     vault.balance = vault.balance.checked_sub(amount)

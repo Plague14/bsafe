@@ -3,6 +3,7 @@ use crate::state::{
     Vault, VaultStatus, MultisigTransaction, TransactionStatus, TransactionType
 };
 use crate::errors::BsafeError;
+use crate::utils::transfer_from_vault_treasury;
 
 #[derive(Accounts)]
 pub struct ExecuteTransaction<'info> {
@@ -58,8 +59,14 @@ pub fn execute_transaction(ctx: Context<ExecuteTransaction>) -> Result<()> {
             require!(vault.balance >= amount, BsafeError::InsufficientFunds);
 
             // Transfer SOL
-            **ctx.accounts.vault_treasury.try_borrow_mut_lamports()? -= amount;
-            **ctx.accounts.destination.try_borrow_mut_lamports()? += amount;
+            transfer_from_vault_treasury(
+                &ctx.accounts.vault_treasury,
+                &ctx.accounts.destination,
+                &ctx.accounts.system_program.to_account_info(),
+                &vault.key(),
+                ctx.bumps.vault_treasury,
+                amount,
+            )?;
 
             // Update vault balance
             vault.balance = vault.balance.saturating_sub(amount);

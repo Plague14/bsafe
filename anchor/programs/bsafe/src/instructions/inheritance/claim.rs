@@ -4,6 +4,7 @@ use crate::state::{
     Beneficiary, BeneficiaryStatus, Membership
 };
 use crate::errors::BsafeError;
+use crate::utils::transfer_from_vault_treasury;
 
 #[derive(Accounts)]
 pub struct ClaimInheritance<'info> {
@@ -77,13 +78,20 @@ pub fn claim_inheritance(ctx: Context<ClaimInheritance>) -> Result<()> {
     }
 
     // Calculate claim amount
-    let gross_claim_amount = beneficiary.calculate_share(plan.distribution_amount);
+    let mut gross_claim_amount = beneficiary.calculate_share(plan.distribution_amount);
 
     require!(gross_claim_amount > 0, BsafeError::InsufficientFunds);
 
     // Ensure vault has enough balance
     let treasury_balance = ctx.accounts.vault_treasury.lamports();
     require!(treasury_balance >= gross_claim_amount, BsafeError::InsufficientFunds);
+
+    // Share rounding can leave dust in the treasury. The runtime rejects leaving
+    // a non-zero balance below the rent-exempt minimum, so sweep it into this claim.
+    let remaining = treasury_balance - gross_claim_amount;
+    if remaining > 0 && remaining < Rent::get()?.minimum_balance(0) {
+        gross_claim_amount = treasury_balance;
+    }
 
     // Calculate fee based on membership tier
     let fee_bps = match &ctx.accounts.membership {
@@ -113,17 +121,33 @@ pub fn claim_inheritance(ctx: Context<ClaimInheritance>) -> Result<()> {
         .checked_sub(fee_amount)
         .ok_or(BsafeError::ArithmeticOverflow)?;
 
+    let vault_key = vault.key();
+    let treasury_bump = ctx.bumps.vault_treasury;
+    let system_program = ctx.accounts.system_program.to_account_info();
+
     // Transfer fee to BSafe treasury (if any)
     if fee_amount > 0 {
-        **ctx.accounts.vault_treasury.try_borrow_mut_lamports()? -= fee_amount;
-        **ctx.accounts.bsafe_treasury.try_borrow_mut_lamports()? += fee_amount;
+        transfer_from_vault_treasury(
+            &ctx.accounts.vault_treasury,
+            &ctx.accounts.bsafe_treasury,
+            &system_program,
+            &vault_key,
+            treasury_bump,
+            fee_amount,
+        )?;
 
         msg!("BSafe fee collected: {} lamports ({}%)", fee_amount, fee_bps as f64 / 100.0);
     }
 
     // Transfer net funds to claimer
-    **ctx.accounts.vault_treasury.try_borrow_mut_lamports()? -= net_claim_amount;
-    **ctx.accounts.claimer.try_borrow_mut_lamports()? += net_claim_amount;
+    transfer_from_vault_treasury(
+        &ctx.accounts.vault_treasury,
+        &ctx.accounts.claimer.to_account_info(),
+        &system_program,
+        &vault_key,
+        treasury_bump,
+        net_claim_amount,
+    )?;
 
     // Mark beneficiary as claimed
     beneficiary.status = BeneficiaryStatus::Claimed;

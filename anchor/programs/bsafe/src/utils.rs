@@ -1,4 +1,35 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program;
+
+/// Transfer lamports out of a vault treasury PDA.
+///
+/// The treasury is a data-less PDA owned by the System Program (it only ever
+/// receives SOL via `system_program::transfer` in `deposit`), so the program
+/// cannot debit its lamports directly — it must CPI into the System Program
+/// and sign with the PDA seeds.
+pub fn transfer_from_vault_treasury<'info>(
+    vault_treasury: &AccountInfo<'info>,
+    to: &AccountInfo<'info>,
+    system_program: &AccountInfo<'info>,
+    vault_key: &Pubkey,
+    treasury_bump: u8,
+    amount: u64,
+) -> Result<()> {
+    let seeds: &[&[u8]] = &[b"vault_treasury", vault_key.as_ref(), &[treasury_bump]];
+    let signer_seeds = &[seeds];
+
+    system_program::transfer(
+        CpiContext::new_with_signer(
+            system_program.clone(),
+            system_program::Transfer {
+                from: vault_treasury.clone(),
+                to: to.clone(),
+            },
+            signer_seeds,
+        ),
+        amount,
+    )
+}
 
 /// Convert a string to a fixed-size byte array for vault names
 pub fn string_to_bytes32(s: &str) -> [u8; 32] {

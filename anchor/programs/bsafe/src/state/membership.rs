@@ -57,7 +57,6 @@ impl MembershipTier {
 
 /// User membership account
 #[account]
-#[derive(Default)]
 pub struct Membership {
     /// The user's wallet
     pub owner: Pubkey,
