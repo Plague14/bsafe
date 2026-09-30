@@ -770,14 +770,18 @@ export function useProgram() {
       setError(null);
 
       const [planPDA] = findInheritancePlanPDA(vault);
+      const [proofPDA] = findProofPDA(planPDA);
 
       const discriminator = getInstructionDiscriminator('cancel_inheritance');
 
+      // Cancelling closes any death certificate proof so it can't re-trigger inheritance
       const instruction = new TransactionInstruction({
         keys: [
           { pubkey: vault, isSigner: false, isWritable: true },
           { pubkey: planPDA, isSigner: false, isWritable: true },
-          { pubkey: wallet.publicKey, isSigner: true, isWritable: false },
+          { pubkey: proofPDA, isSigner: false, isWritable: true },
+          { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         ],
         programId: PROGRAM_ID,
         data: discriminator,

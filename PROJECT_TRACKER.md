@@ -21,7 +21,17 @@ Verificado nesta data (build + testes executados, não só código escrito):
       (`DeclaredProgramIdMismatch`). Binário on-chain = build local (mesmo SHA-256), 6/6 testes
       passam contra o dump da devnet, smoke test real (create/deposit/withdraw) OK
 - [x] `initialize_treasury` na devnet — PDA `HMos1xQatoZYHXq8jLtMixhWkAkfeUmLRXaCQe7UR4av`
-- [ ] Frontend sem UI para: withdraw, multisig, submit/verify de certidão, add_verifier
+- [x] Telas novas (2026-09-30), testadas pela UI na devnet com carteira de teste:
+      saque, Multisig (signatários, propor/aprovar/executar), verificadores, Minhas Heranças
+      (herdeiro/verificador: certidão por hash SHA-256, conferir documento, verificar, iniciar, resgatar),
+      remover herdeiro, reativar plano
+- [x] Bug multisig corrigido: dono contado como signatário sem conta → adicionar 1 co-signatário
+      travava os fundos; índice de aprovação reutilizado após remoção
+- [x] Falha de segurança corrigida: após o dono cancelar, a certidão refutada continuava válida e
+      re-disparava a herança imediatamente. Cancelar agora fecha a prova (verificado on-chain)
+- [x] 9/9 testes de integração; binário da devnet = build local (SHA-256)
+- [x] App ficava em branco (router sem basename para /bsafe/) — corrigido
+- [ ] Resgate (claim) testado só no LiteSVM — na devnet exige esperar o cooldown mínimo de 1 dia
 - [ ] Deploy do frontend (Vercel), screenshots, vídeos, submission
 
 ## Status Geral (histórico — superestimado, ver "Status Real" acima)

@@ -152,6 +152,8 @@ export function InheritancesPage() {
             cooldownOver;
           const gross = plan && beneficiary ? plan.distributionAmount * beneficiary.sharePercent / 100 : 0;
           const current = stepIndex(view);
+          // Verifications count per proof: a new certificate after a cancel needs a new verification
+          const verifiedThisProof = !!verifier?.hasVerified && !!proof && verifier.verifiedAt >= proof.submittedAt;
 
           return (
             <Card key={key}>
@@ -278,7 +280,7 @@ export function InheritancesPage() {
                       </label>
                     )}
 
-                    {verifier && !verifier.hasVerified && plan.status === 'proofSubmitted' && proof && !proof.verified && (
+                    {verifier && !verifiedThisProof && plan.status === 'proofSubmitted' && proof && !proof.verified && (
                       <>
                         <label className="inline-flex">
                           <input
@@ -302,7 +304,7 @@ export function InheritancesPage() {
                         </Button>
                       </>
                     )}
-                    {verifier?.hasVerified && (
+                    {verifiedThisProof && (
                       <span className="text-xs text-blue-700 self-center flex items-center gap-1">
                         <CheckCircle className="w-4 h-4" /> Você já verificou
                       </span>

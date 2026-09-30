@@ -787,7 +787,8 @@ export function PlansPage() {
               <div className="text-sm text-yellow-700">
                 <p className="font-medium">Importante</p>
                 <p>
-                  Após criar o plano, você precisa adicionar beneficiários para definir como os ativos serão divididos.
+                  Os herdeiros precisam somar 100% antes de criar o plano. Se o gatilho usar certidão de óbito,
+                  adicione os verificadores logo depois de criar o plano.
                 </p>
               </div>
             </div>

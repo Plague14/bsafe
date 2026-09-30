@@ -8,8 +8,8 @@
 | **Network** | Solana Devnet |
 | **RPC URL** | `https://api.devnet.solana.com` |
 | **Explorer** | [View Program](https://explorer.solana.com/address/3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv?cluster=devnet) |
-| **Deploy Date** | 2026-09-30 (upgrade; original deploy 2026-09-18) |
-| **Deploy TX** | `5BEAiGDMpGCWz3om1GATPHo9gTt7dZadGynqRtcQLzMvTcTKdc6s5cvz7pd7vNHsuER9wpZaGQBvsinfyx8jsYEp` |
+| **Deploy Date** | 2026-09-30 (latest upgrade; original deploy 2026-09-18) |
+| **Deploy TX** | `K2AFPTKqnrrAzCXCmT3XAGNzD8RPqH28HU7nFpoKBmsBTRz9yjqchGBL16a5ZUmNKueEmyVUiCDPZmHJp1zAsyX` |
 | **Fee Treasury PDA** | `HMos1xQatoZYHXq8jLtMixhWkAkfeUmLRXaCQe7UR4av` (initialized) |
 
 ## Program Features
@@ -91,7 +91,13 @@ Build notes:
   own IDL step compiles with `--cfg procmacro2_semver_exempt`, which fails on current Rust.
 - The Windows SDK libs come from the `Microsoft.Windows.SDK.CPP.x64` NuGet package extracted
   to `Z:\HD_1\DFK\BSafe\winsdk\lib` (`build.bat` sets `LIB`/`INCLUDE`).
-- The release profile uses `opt-level = "s"` so the `.so` fits the program's allocated size.
+- The release profile uses `opt-level = "z"` so the `.so` fits the program's allocated size and
+  the upgrade buffer rent stays around 2.24 SOL (refunded after the upgrade).
+- Deploy **without** `--use-rpc`: sending writes through the public RPC hits its rate limit and can
+  take ~2h or fail; the default (TPU) path finishes in about a minute. If a deploy fails midway, the
+  log prints a seed phrase for the buffer — recover it and pass it with `--buffer` to resume.
+- Set `VITE_RPC_URL` (e.g. a Helius/QuickNode devnet endpoint) for demos: the public devnet RPC
+  returns 429 under load and the app will show a rate-limit error.
 
 ## Deployer Wallet
 
