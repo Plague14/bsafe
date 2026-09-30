@@ -8,8 +8,9 @@
 | **Network** | Solana Devnet |
 | **RPC URL** | `https://api.devnet.solana.com` |
 | **Explorer** | [View Program](https://explorer.solana.com/address/3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv?cluster=devnet) |
-| **Deploy Date** | 2026-09-18 |
-| **Deploy TX** | `5KCrfpkHMh6y4xVU9ASUadCjey2RZCWaQhScr11ujM3oxXyXi1cn31jko2rLBbkqVwAdbseY2iZKZgJSchHRyr75` |
+| **Deploy Date** | 2026-09-30 (upgrade; original deploy 2026-09-18) |
+| **Deploy TX** | `5BEAiGDMpGCWz3om1GATPHo9gTt7dZadGynqRtcQLzMvTcTKdc6s5cvz7pd7vNHsuER9wpZaGQBvsinfyx8jsYEp` |
+| **Fee Treasury PDA** | `HMos1xQatoZYHXq8jLtMixhWkAkfeUmLRXaCQe7UR4av` (initialized) |
 
 ## Program Features
 
@@ -58,7 +59,7 @@ const connection = new Connection(RPC_URL, 'confirmed');
 
 | Account | Seeds |
 |---------|-------|
-| Vault | `["vault", owner.pubkey]` |
+| Vault | `["vault", owner.pubkey, name (32 bytes)]` |
 | Vault Treasury | `["vault_treasury", vault.pubkey]` |
 | Beneficiary | `["beneficiary", vault.pubkey, wallet.pubkey]` |
 | Inheritance Plan | `["inheritance", vault.pubkey]` |
@@ -69,16 +70,28 @@ const connection = new Connection(RPC_URL, 'confirmed');
 
 ## Build & Deploy Commands
 
-```bash
-# Build (via Docker)
-docker run --rm -v Z:\HD_1\DFK\BSafe\bsafe-clean\bsafe-clean\anchor:/workdir -w /workdir rust:latest bash /workdir/docker-build.sh
+Everything builds natively on Windows; toolchains and caches live on `Z:` (nothing on `C:`).
 
-# Deploy
-solana program deploy anchor/target/deploy/bsafe.so
+```bash
+# Build program (.so) + IDL (target/idl/bsafe.json, target/types/bsafe.ts)
+anchoruild.bat
+
+# Integration tests: run the compiled bsafe.so in LiteSVM (vault, inheritance, multisig)
+cd anchor/tests-svm && cargo test
+
+# Upgrade the devnet program (upgrade authority = deployer wallet)
+solana -u devnet program deploy anchor/target/deploy/bsafe.so   --program-id 3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv   -k anchor/deployer-keypair.json --upgrade-authority anchor/deployer-keypair.json
 
 # Check program
-solana program show 3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv
+solana -u devnet program show 3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv
 ```
+
+Build notes:
+- `build.bat` runs `anchor build --no-idl` then `anchor/scripts/build-idl.py`. Anchor 0.30.1's
+  own IDL step compiles with `--cfg procmacro2_semver_exempt`, which fails on current Rust.
+- The Windows SDK libs come from the `Microsoft.Windows.SDK.CPP.x64` NuGet package extracted
+  to `Z:\HD_1\DFK\BSafe\winsdk\lib` (`build.bat` sets `LIB`/`INCLUDE`).
+- The release profile uses `opt-level = "s"` so the `.so` fits the program's allocated size.
 
 ## Deployer Wallet
 

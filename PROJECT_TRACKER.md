@@ -3,7 +3,28 @@
 > Deadline: 12 de outubro de 2026
 > Stack: Anchor (Rust) + React + TypeScript
 
-## Status Geral
+## Status Real (2026-09-29)
+
+Verificado nesta data (build + testes executados, não só código escrito):
+
+- [x] Programa compila (`anchor\build.bat`) — `bsafe.so` 456 KB + IDL gerada
+- [x] **Bug crítico corrigido:** `withdraw`, `claim_inheritance` e `execute_transaction`
+      debitavam lamports direto da `vault_treasury` (conta do System Program) — o runtime
+      rejeita isso. Agora usam `system_program::transfer` assinado pelo PDA.
+- [x] Último claim não trava mais por "poeira" de arredondamento abaixo do rent mínimo
+- [x] **6/6 testes de integração passando** (`anchor/tests-svm`, LiteSVM rodando o `.so` real):
+      vault, shares, herança por deadman (3 herdeiros + taxa), certidão de óbito + cancelamento,
+      cancelamento após cooldown, multisig 2-de-2
+- [x] Frontend: `initiate_inheritance` e `claim_inheritance` passavam contas opcionais erradas — corrigido
+- [x] Frontend compila (`npm run build`) — antes falhava com 23 erros de TypeScript (CI quebrado)
+- [x] Redeploy na devnet (2026-09-30) — o binário antigo de 18/09 falhava em TODA instrução
+      (`DeclaredProgramIdMismatch`). Binário on-chain = build local (mesmo SHA-256), 6/6 testes
+      passam contra o dump da devnet, smoke test real (create/deposit/withdraw) OK
+- [x] `initialize_treasury` na devnet — PDA `HMos1xQatoZYHXq8jLtMixhWkAkfeUmLRXaCQe7UR4av`
+- [ ] Frontend sem UI para: withdraw, multisig, submit/verify de certidão, add_verifier
+- [ ] Deploy do frontend (Vercel), screenshots, vídeos, submission
+
+## Status Geral (histórico — superestimado, ver "Status Real" acima)
 - [x] Fase 1: Infraestrutura — ✅
 - [x] Fase 2: Smart Contracts — ✅ COMPILADO E DEPLOYED!
 - [x] Fase 3: Frontend — ✅ Completo com integração on-chain
