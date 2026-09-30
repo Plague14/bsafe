@@ -1,9 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Zap, Lock, Users, Check, ArrowRight, Wallet } from 'lucide-react';
+import { Shield, Zap, Lock, Users, Wallet } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useEffect } from 'react';
-import { Header } from '../components/layout';
-import { Button, Card, WalletButton } from '../components/ui';
+import { Button, WalletButton } from '../components/ui';
 
 const features = [
   { icon: Lock, title: 'Non-Custodial', desc: 'Você mantém controle total. Suas chaves, seus ativos.' },

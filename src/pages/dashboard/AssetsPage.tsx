@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, ArrowDownRight, ArrowUpRight, Copy, Check, ExternalLink, RefreshCw, Wallet } from 'lucide-react';
 import { Card, Button, Input, Modal } from '../../components/ui';
-import { useProgram, Vault } from '../../hooks/useProgram';
+import { useProgram, type Vault } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export function AssetsPage() {
   const { publicKey } = useWallet();

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Users, ExternalLink, Copy, Check, RefreshCw, Wallet, AlertTriangle } from 'lucide-react';
 import { Card, Button, Input, Modal } from '../../components/ui';
-import { useProgram, Vault, Beneficiary } from '../../hooks/useProgram';
+import { useProgram, type Vault, type Beneficiary } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { Link } from 'react-router-dom';
@@ -457,7 +457,7 @@ export function BeneficiariesPage() {
             </Button>
             <Button
               onClick={handleUpdateShares}
-              disabled={loading || (showEditModal && (() => {
+              disabled={loading || (!!showEditModal && (() => {
                 const otherTotal = activeBeneficiaries
                   .filter(b => b.address.toBase58() !== showEditModal.address.toBase58())
                   .reduce((sum, b) => sum + b.sharePercent, 0);

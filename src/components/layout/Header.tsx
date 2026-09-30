@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ variant = 'landing' }: HeaderProps) {
   const location = useLocation();
-  const { user, toggleSidebar, notifications } = useStore();
+  const { toggleSidebar, notifications } = useStore();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   if (variant === 'landing') {

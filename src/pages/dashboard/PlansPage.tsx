@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Clock, FileText, Users, AlertTriangle, Shield, Wallet, RefreshCw, Play, XCircle, CheckCircle, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Modal } from '../../components/ui';
-import { useProgram, Vault, InheritancePlan, TriggerType, Beneficiary } from '../../hooks/useProgram';
+import { useProgram, type Vault, type InheritancePlan, type TriggerType, type Beneficiary } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 export function PlansPage() {

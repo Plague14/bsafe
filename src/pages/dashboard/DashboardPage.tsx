@@ -8,7 +8,7 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export function DashboardPage() {
   const { publicKey, connected } = useWallet();
-  const { connection, getBalance, requestAirdrop, loading } = useProgram();
+  const { connection } = useProgram();
   const [balance, setBalance] = useState<number>(0);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -45,15 +45,6 @@ export function DashboardPage() {
     }
     setRefreshing(false);
   };
-
-  // Mock data for beneficiaries (will be replaced with on-chain data)
-  const beneficiaries = [
-    { id: 1, name: 'Filho 1', percentage: 50 },
-    { id: 2, name: 'Filho 2', percentage: 30 },
-    { id: 3, name: 'Cônjuge', percentage: 20 },
-  ];
-
-  const totalSOL = balance;
 
   // Not connected view
   if (!connected) {

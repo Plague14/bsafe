@@ -8,7 +8,7 @@ import {
 } from '@solana/web3.js';
 import { useCallback, useState } from 'react';
 import { PROGRAM_ID } from '../lib/constants';
-import { findVaultPDA, findVaultTreasuryPDA, findBeneficiaryPDA, findInheritancePlanPDA, findMembershipPDA, findBsafeTreasuryPDA, nameToBytes32 } from '../lib/pda';
+import { findVaultPDA, findVaultTreasuryPDA, findBeneficiaryPDA, findInheritancePlanPDA, findProofPDA, findMembershipPDA, findBsafeTreasuryPDA, nameToBytes32 } from '../lib/pda';
 import { sha256 } from '@noble/hashes/sha256';
 
 export interface Vault {
@@ -101,7 +101,6 @@ export function useProgram() {
         const nameBytes = data.slice(40, 72);
         const name = new TextDecoder().decode(nameBytes).replace(/\0+$/, '');
         const status = data[72];
-        const balance = Number(data.readBigUInt64LE(73));
         const beneficiaryCount = data[81];
         const multisigEnabled = data[82] === 1;
         const multisigThreshold = data[83];
@@ -200,7 +199,7 @@ export function useProgram() {
       setLoading(true);
       setError(null);
 
-      const [treasuryPDA, treasuryBump] = findVaultTreasuryPDA(vault);
+      const [treasuryPDA] = findVaultTreasuryPDA(vault);
       const lamports = Math.floor(amount * LAMPORTS_PER_SOL);
 
       // Build instruction data: discriminator + amount (u64)
@@ -575,14 +574,19 @@ export function useProgram() {
 
       const [planPDA] = findInheritancePlanPDA(vault);
       const [treasuryPDA] = findVaultTreasuryPDA(vault);
+      const [proofPDA] = findProofPDA(planPDA);
 
       const discriminator = getInstructionDiscriminator('initiate_inheritance');
+
+      // Optional proof account (death certificate trigger); program ID when absent
+      const proofInfo = await connection.getAccountInfo(proofPDA);
 
       const instruction = new TransactionInstruction({
         keys: [
           { pubkey: vault, isSigner: false, isWritable: true },
           { pubkey: planPDA, isSigner: false, isWritable: true },
           { pubkey: treasuryPDA, isSigner: false, isWritable: false },
+          { pubkey: proofInfo ? proofPDA : PROGRAM_ID, isSigner: false, isWritable: false },
           { pubkey: wallet.publicKey, isSigner: true, isWritable: false },
         ],
         programId: PROGRAM_ID,
@@ -685,10 +689,12 @@ export function useProgram() {
         { pubkey: treasuryPDA, isSigner: false, isWritable: true },
       ];
 
-      // Add membership account if it exists (optional account)
-      if (membershipInfo) {
-        keys.push({ pubkey: membershipPDA, isSigner: false, isWritable: false });
-      }
+      // Optional account: Anchor expects the program ID in this slot when it's absent
+      keys.push({
+        pubkey: membershipInfo ? membershipPDA : PROGRAM_ID,
+        isSigner: false,
+        isWritable: false,
+      });
 
       // Add bsafe treasury and remaining accounts
       keys.push(
