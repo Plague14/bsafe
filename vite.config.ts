@@ -4,5 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/bsafe/',
+  // Served from the domain root on Vercel; the router follows import.meta.env.BASE_URL
+  base: '/',
 })

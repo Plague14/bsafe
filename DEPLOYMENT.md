@@ -99,6 +99,19 @@ Build notes:
 - Set `VITE_RPC_URL` (e.g. a Helius/QuickNode devnet endpoint) for demos: the public devnet RPC
   returns 429 under load and the app will show a rate-limit error.
 
+## Frontend (Vercel)
+
+Served from the domain root (`base: '/'` in `vite.config.ts`). `vercel.json` sets the Vite build,
+SPA rewrites (deep links like `/dashboard/inheritances` work on refresh) and long-term caching for
+hashed `/assets/*`.
+
+1. Import the repository in Vercel (framework: Vite, settings come from `vercel.json`).
+2. Environment variables (Production + Preview):
+   - `VITE_RPC_URL` — a devnet RPC with higher limits (Helius/QuickNode free tier). Optional, but the
+     public `https://api.devnet.solana.com` returns 429 under load.
+   - `VITE_PROGRAM_ID` — optional, defaults to `3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv`.
+3. Deploy. The dev-only burner wallet is excluded from production builds.
+
 ## Deployer Wallet
 
 - **Address:** `7oZZF58zWcNW1cGEmXLhJasAY8dUCB4qwp5WBJ39Gzod`
