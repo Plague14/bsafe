@@ -63,3 +63,67 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
 ::selection { background: rgba(37, 99, 235, 0.2); color: #1E40AF; }
+
+/* Solana wallet-adapter: brand blue button and light modal (library default is purple/dark).
+   Doubled class selectors win over the library stylesheet, which loads after this file. */
+.wallet-adapter-button.wallet-adapter-button-trigger {
+  background-color: var(--color-primary-600);
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background-color: var(--color-primary-700);
+}
+.wallet-on-blue .wallet-adapter-button.wallet-adapter-button-trigger {
+  background-color: #fff;
+  color: var(--color-primary-700);
+}
+.wallet-on-blue .wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background-color: var(--color-primary-50);
+}
+.wallet-adapter-dropdown .wallet-adapter-dropdown-list {
+  background: #fff;
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-elevated);
+  font-family: inherit;
+}
+.wallet-adapter-dropdown .wallet-adapter-dropdown-list-item {
+  color: var(--color-gray-700);
+  font-family: inherit;
+}
+.wallet-adapter-dropdown .wallet-adapter-dropdown-list-item:not([disabled]):hover {
+  background-color: var(--color-primary-50);
+}
+.wallet-adapter-modal .wallet-adapter-modal-wrapper {
+  background: #fff;
+  box-shadow: var(--shadow-elevated);
+  font-family: inherit;
+}
+.wallet-adapter-modal .wallet-adapter-modal-title {
+  color: var(--color-gray-900);
+}
+.wallet-adapter-modal .wallet-adapter-modal-button-close {
+  background: var(--color-gray-100);
+}
+.wallet-adapter-modal .wallet-adapter-modal-button-close svg {
+  fill: var(--color-gray-500);
+}
+.wallet-adapter-modal .wallet-adapter-modal-list .wallet-adapter-button {
+  color: var(--color-gray-900);
+  font-family: inherit;
+}
+.wallet-adapter-modal .wallet-adapter-modal-list .wallet-adapter-button:not([disabled]):hover {
+  background-color: var(--color-primary-50);
+}
+.wallet-adapter-modal .wallet-adapter-modal-list-more {
+  color: var(--color-gray-700);
+}
+.wallet-adapter-modal .wallet-adapter-modal-list-more svg {
+  fill: var(--color-gray-700);
+}
+.wallet-adapter-modal .wallet-adapter-modal-overlay {
+  background: rgba(10, 31, 68, 0.4);
+}

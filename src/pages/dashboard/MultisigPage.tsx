@@ -22,7 +22,7 @@ function parseKey(value: string): PublicKey | null {
 
 const statusLabel: Record<MultisigTransaction['status'], { text: string; className: string }> = {
   pending: { text: 'Pendente', className: 'bg-amber-100 text-amber-700' },
-  approved: { text: 'Aprovada', className: 'bg-emerald-100 text-emerald-700' },
+  approved: { text: 'Aprovada', className: 'bg-green-100 text-green-700' },
   executed: { text: 'Executada', className: 'bg-gray-100 text-gray-600' },
   cancelled: { text: 'Rejeitada', className: 'bg-red-100 text-red-700' },
 };

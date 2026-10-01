@@ -50,20 +50,22 @@ export function DashboardPage() {
   if (!connected) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border-0">
+        <Card className="bg-gradient-to-br from-primary-600 to-primary-800 text-white border-0">
           <div className="text-center py-8">
-            <Wallet className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <Wallet className="w-16 h-16 mx-auto mb-4 text-primary-200" />
             <h2 className="text-2xl font-bold mb-2">Conecte sua Carteira</h2>
-            <p className="text-gray-400 mb-6">
+            <p className="text-primary-100 mb-6">
               Para acessar o BSafe, conecte sua carteira Solana (Phantom, Solflare, etc.)
             </p>
-            <WalletButton />
+            <div className="wallet-on-blue">
+              <WalletButton />
+            </div>
           </div>
         </Card>
 
         <Card header={<span className="font-semibold text-gray-900">O que é o BSafe?</span>}>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="p-4 bg-emerald-50 rounded-lg">
+            <div className="p-4 bg-primary-50 rounded-lg">
               <div className="text-2xl mb-2">🔐</div>
               <h3 className="font-semibold text-gray-900 mb-1">Multisig Seguro</h3>
               <p className="text-sm text-gray-600">Múltiplas assinaturas para proteger seus ativos</p>
@@ -73,7 +75,7 @@ export function DashboardPage() {
               <h3 className="font-semibold text-gray-900 mb-1">Herança Digital</h3>
               <p className="text-sm text-gray-600">Transfira seus ativos automaticamente para herdeiros</p>
             </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
+            <div className="p-4 bg-primary-50 rounded-lg">
               <div className="text-2xl mb-2">⏰</div>
               <h3 className="font-semibold text-gray-900 mb-1">Deadman Switch</h3>
               <p className="text-sm text-gray-600">Ativação automática por inatividade</p>
@@ -95,19 +97,19 @@ export function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-medium">
+          <span className="px-2 py-1 bg-primary-100 text-primary-700 rounded text-xs font-medium">
             Devnet
           </span>
         </div>
       </div>
 
       {/* Balance Card */}
-      <Card className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white border-0">
+      <Card className="bg-gradient-to-br from-primary-600 to-primary-800 text-white border-0">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-emerald-200 text-sm mb-1">Saldo da Carteira</p>
+            <p className="text-primary-200 text-sm mb-1">Saldo da Carteira</p>
             <p className="text-4xl font-bold mb-1">{balance.toFixed(4)} SOL</p>
-            <p className="text-emerald-200 text-sm">≈ ${(balance * 150).toFixed(2)} USD</p>
+            <p className="text-primary-200 text-sm">≈ ${(balance * 150).toFixed(2)} USD</p>
           </div>
           <button
             onClick={fetchBalance}
@@ -139,8 +141,8 @@ export function DashboardPage() {
       <div className="grid md:grid-cols-3 gap-4">
         <Card>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-emerald-100 rounded-lg">
-              <Wallet className="w-6 h-6 text-emerald-600" />
+            <div className="p-3 bg-primary-100 rounded-lg">
+              <Wallet className="w-6 h-6 text-primary-600" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Vaults Ativos</p>
@@ -161,8 +163,8 @@ export function DashboardPage() {
         </Card>
         <Card>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <FileText className="w-6 h-6 text-purple-600" />
+            <div className="p-3 bg-primary-100 rounded-lg">
+              <FileText className="w-6 h-6 text-primary-600" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Plano de Herança</p>
@@ -176,8 +178,8 @@ export function DashboardPage() {
         {/* Create Vault CTA */}
         <Card header={<span className="font-semibold text-gray-900">Criar Vault</span>}>
           <div className="text-center py-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-emerald-100 rounded-full flex items-center justify-center">
-              <Plus className="w-8 h-8 text-emerald-600" />
+            <div className="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center">
+              <Plus className="w-8 h-8 text-primary-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-2">Crie seu primeiro Vault</h3>
             <p className="text-sm text-gray-500 mb-4">
@@ -193,7 +195,7 @@ export function DashboardPage() {
         <Card header={
           <div className="flex items-center justify-between">
             <span className="font-semibold text-gray-900">Beneficiários</span>
-            <Link to="/dashboard/beneficiaries" className="text-sm text-emerald-600 hover:underline">
+            <Link to="/dashboard/beneficiaries" className="text-sm text-primary-600 hover:underline">
               Configurar
             </Link>
           </div>
@@ -216,15 +218,15 @@ export function DashboardPage() {
       <Card header={<span className="font-semibold text-gray-900">Ações Rápidas</span>}>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { to: '/dashboard/assets', icon: Plus, label: 'Criar Vault', color: 'text-emerald-600' },
+            { to: '/dashboard/assets', icon: Plus, label: 'Criar Vault', color: 'text-primary-600' },
             { to: '/dashboard/beneficiaries', icon: Users, label: 'Gerenciar Herdeiros', color: 'text-blue-600' },
-            { to: '/dashboard/plans', icon: FileText, label: 'Plano de Herança', color: 'text-purple-600' },
+            { to: '/dashboard/plans', icon: FileText, label: 'Plano de Herança', color: 'text-primary-600' },
             { to: '/dashboard/settings', icon: MessageSquare, label: 'Configurações', color: 'text-gray-600' },
           ].map(action => (
             <Link
               key={action.to}
               to={action.to}
-              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-emerald-200 hover:bg-emerald-50 transition-colors"
+              className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-primary-200 hover:bg-primary-50 transition-colors"
             >
               <action.icon className={`w-5 h-5 ${action.color}`} />
               <span className="text-sm font-medium text-gray-900">{action.label}</span>
@@ -237,7 +239,7 @@ export function DashboardPage() {
       <Card>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+            <div className="w-2 h-2 rounded-full bg-primary-500"></div>
             <span className="text-gray-500">Conectado à Solana Devnet</span>
           </div>
           <span className="font-mono text-gray-400">

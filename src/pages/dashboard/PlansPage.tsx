@@ -206,7 +206,7 @@ export function PlansPage() {
       case 'configured': return 'bg-blue-100 text-blue-700';
       case 'proofSubmitted': return 'bg-yellow-100 text-yellow-700';
       case 'cooldownActive': return 'bg-orange-100 text-orange-700';
-      case 'claimReady': return 'bg-emerald-100 text-emerald-700';
+      case 'claimReady': return 'bg-green-100 text-green-700';
       case 'completed': return 'bg-gray-100 text-gray-700';
       case 'cancelled': return 'bg-red-100 text-red-700';
       default: return 'bg-gray-100 text-gray-700';
@@ -340,7 +340,7 @@ export function PlansPage() {
             inheritancePlan.status === 'cooldownActive'
               ? 'bg-gradient-to-br from-orange-500 to-orange-700 text-white'
               : inheritancePlan.status === 'claimReady'
-              ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white'
+              ? 'bg-gradient-to-br from-primary-500 to-primary-700 text-white'
               : 'bg-gradient-to-br from-blue-600 to-blue-800 text-white'
           }`}>
             <div className="flex items-center justify-between">
@@ -403,7 +403,7 @@ export function PlansPage() {
               {canClaim && (
                 <Button
                   size="sm"
-                  className="bg-white text-emerald-700 hover:bg-white/90 border-0"
+                  className="bg-white text-primary-700 hover:bg-white/90 border-0"
                   onClick={() => setShowClaimModal(true)}
                   icon={<CheckCircle className="w-4 h-4" />}
                 >
@@ -430,11 +430,11 @@ export function PlansPage() {
           {/* Claim Ready Notice */}
           {(inheritancePlan.status === 'claimReady' ||
             (inheritancePlan.status === 'cooldownActive' && inheritancePlan.cooldownEndsAt <= Date.now())) && userBeneficiary && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-emerald-800">Você pode clamar sua herança!</p>
-                <p className="text-sm text-emerald-700">
+                <p className="font-medium text-primary-800">Você pode clamar sua herança!</p>
+                <p className="text-sm text-primary-700">
                   Sua parte é de {userBeneficiary.sharePercent.toFixed(1)}%
                   (≈ {((userBeneficiary.sharePercent / 100) * inheritancePlan.distributionAmount).toFixed(4)} SOL).
                   Clique em "Clamar Herança" para receber seus fundos.
@@ -459,8 +459,8 @@ export function PlansPage() {
 
             <Card>
               <div className="flex items-start gap-3">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <Clock className="w-6 h-6 text-purple-600" />
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <Clock className="w-6 h-6 text-primary-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Período de Cooldown</p>
@@ -483,8 +483,8 @@ export function PlansPage() {
 
             <Card>
               <div className="flex items-start gap-3">
-                <div className="p-3 bg-emerald-100 rounded-lg">
-                  <Users className="w-6 h-6 text-emerald-600" />
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <Users className="w-6 h-6 text-primary-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Verificações Necessárias</p>
@@ -528,7 +528,7 @@ export function PlansPage() {
                         {v.verifier.toBase58().slice(0, 6)}...{v.verifier.toBase58().slice(-6)}
                       </code>
                       {v.hasVerified ? (
-                        <span className="flex items-center gap-1 text-emerald-700">
+                        <span className="flex items-center gap-1 text-green-700">
                           <ShieldCheck className="w-4 h-4" /> Verificou
                         </span>
                       ) : (
@@ -580,7 +580,7 @@ export function PlansPage() {
                 </div>
               )}
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-sm">
                   {inheritancePlan.triggerType === 'both' ? '3' : '2'}
                 </div>
                 <div>
@@ -591,7 +591,7 @@ export function PlansPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-sm">
                   {inheritancePlan.triggerType === 'both' ? '4' : '3'}
                 </div>
                 <div>
@@ -609,17 +609,17 @@ export function PlansPage() {
           {/* Validation checklist */}
           <Card header={<span className="font-semibold text-gray-900">Requisitos para criar plano</span>}>
             <div className="space-y-3">
-              <div className={`flex items-center gap-3 p-3 rounded-lg ${hasBeneficiaries ? 'bg-emerald-50' : 'bg-red-50'}`}>
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${hasBeneficiaries ? 'bg-green-50' : 'bg-red-50'}`}>
                 {hasBeneficiaries ? (
-                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  <CheckCircle className="w-5 h-5 text-green-600" />
                 ) : (
                   <XCircle className="w-5 h-5 text-red-500" />
                 )}
                 <div>
-                  <p className={`font-medium ${hasBeneficiaries ? 'text-emerald-900' : 'text-red-900'}`}>
+                  <p className={`font-medium ${hasBeneficiaries ? 'text-green-900' : 'text-red-900'}`}>
                     Beneficiários cadastrados
                   </p>
-                  <p className={`text-sm ${hasBeneficiaries ? 'text-emerald-700' : 'text-red-700'}`}>
+                  <p className={`text-sm ${hasBeneficiaries ? 'text-green-700' : 'text-red-700'}`}>
                     {hasBeneficiaries
                       ? `${beneficiaries.length} beneficiário(s) adicionado(s)`
                       : 'Adicione pelo menos 1 beneficiário'}
@@ -627,17 +627,17 @@ export function PlansPage() {
                 </div>
               </div>
 
-              <div className={`flex items-center gap-3 p-3 rounded-lg ${isFullyAllocated ? 'bg-emerald-50' : 'bg-red-50'}`}>
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${isFullyAllocated ? 'bg-green-50' : 'bg-red-50'}`}>
                 {isFullyAllocated ? (
-                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  <CheckCircle className="w-5 h-5 text-green-600" />
                 ) : (
                   <XCircle className="w-5 h-5 text-red-500" />
                 )}
                 <div>
-                  <p className={`font-medium ${isFullyAllocated ? 'text-emerald-900' : 'text-red-900'}`}>
+                  <p className={`font-medium ${isFullyAllocated ? 'text-green-900' : 'text-red-900'}`}>
                     Alocação completa (100%)
                   </p>
-                  <p className={`text-sm ${isFullyAllocated ? 'text-emerald-700' : 'text-red-700'}`}>
+                  <p className={`text-sm ${isFullyAllocated ? 'text-green-700' : 'text-red-700'}`}>
                     {isFullyAllocated
                       ? 'Soma das porcentagens = 100%'
                       : `Atual: ${totalBeneficiaryPercent.toFixed(1)}% (faltam ${(100 - totalBeneficiaryPercent).toFixed(1)}%)`}
@@ -703,7 +703,7 @@ export function PlansPage() {
             <select
               value={form.triggerType}
               onChange={(e) => setForm({ ...form, triggerType: e.target.value as TriggerType })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="both">Híbrido (Recomendado)</option>
               <option value="deadmanSwitch">Apenas Deadman Switch</option>
@@ -724,7 +724,7 @@ export function PlansPage() {
               max={365}
               value={form.cooldownDays}
               onChange={(e) => setForm({ ...form, cooldownDays: Number(e.target.value) })}
-              className="w-full accent-emerald-600"
+              className="w-full accent-primary-600"
             />
             <div className="flex justify-between text-xs text-gray-500">
               <span>1 dia</span>
@@ -746,7 +746,7 @@ export function PlansPage() {
                 max={1825}
                 value={form.deadmanSwitchDays}
                 onChange={(e) => setForm({ ...form, deadmanSwitchDays: Number(e.target.value) })}
-                className="w-full accent-emerald-600"
+                className="w-full accent-primary-600"
               />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>30 dias</span>
@@ -769,7 +769,7 @@ export function PlansPage() {
                 max={10}
                 value={form.requiredVerifications}
                 onChange={(e) => setForm({ ...form, requiredVerifications: Number(e.target.value) })}
-                className="w-full accent-emerald-600"
+                className="w-full accent-primary-600"
               />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>1</span>
@@ -870,12 +870,12 @@ export function PlansPage() {
       >
         {userBeneficiary && inheritancePlan && (
           <div className="space-y-4">
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
-              <p className="text-sm text-emerald-700 mb-1">Valor a receber</p>
-              <p className="text-3xl font-bold text-emerald-700">
+            <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg text-center">
+              <p className="text-sm text-primary-700 mb-1">Valor a receber</p>
+              <p className="text-3xl font-bold text-primary-700">
                 {((userBeneficiary.sharePercent / 100) * inheritancePlan.distributionAmount).toFixed(4)} SOL
               </p>
-              <p className="text-sm text-emerald-600 mt-1">
+              <p className="text-sm text-primary-600 mt-1">
                 ({userBeneficiary.sharePercent.toFixed(1)}% de {inheritancePlan.distributionAmount.toFixed(4)} SOL)
               </p>
             </div>

@@ -129,11 +129,11 @@ export function AssetsPage() {
       </div>
 
       {/* Total Balance */}
-      <Card className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white border-0">
-        <p className="text-emerald-200 text-sm mb-1">Saldo Total em Vaults</p>
+      <Card className="bg-gradient-to-br from-primary-600 to-primary-800 text-white border-0">
+        <p className="text-primary-200 text-sm mb-1">Saldo Total em Vaults</p>
         <p className="text-3xl font-bold mb-1">{totalBalance.toFixed(4)} SOL</p>
-        <p className="text-emerald-200 text-sm">≈ ${(totalBalance * 150).toFixed(2)} USD</p>
-        <p className="text-emerald-300 text-xs mt-2">{vaults.length} vault{vaults.length !== 1 ? 's' : ''} ativo{vaults.length !== 1 ? 's' : ''}</p>
+        <p className="text-primary-200 text-sm">≈ ${(totalBalance * 150).toFixed(2)} USD</p>
+        <p className="text-primary-300 text-xs mt-2">{vaults.length} vault{vaults.length !== 1 ? 's' : ''} ativo{vaults.length !== 1 ? 's' : ''}</p>
       </Card>
 
       {error && (
@@ -163,8 +163,8 @@ export function AssetsPage() {
             <Card key={vault.address.toBase58()}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                    <Wallet className="w-6 h-6 text-emerald-600" />
+                  <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
+                    <Wallet className="w-6 h-6 text-primary-600" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">{vault.name || 'Vault'}</p>
@@ -175,7 +175,7 @@ export function AssetsPage() {
                         className="p-0.5 hover:bg-gray-100 rounded"
                       >
                         {copied === vault.address.toBase58() ? (
-                          <Check className="w-3 h-3 text-emerald-600" />
+                          <Check className="w-3 h-3 text-primary-600" />
                         ) : (
                           <Copy className="w-3 h-3 text-gray-400" />
                         )}
@@ -202,8 +202,8 @@ export function AssetsPage() {
                 <div>
                   <p className="text-xs text-gray-500">Status</p>
                   <p className={`text-sm font-medium ${
-                    vault.status === 'active' ? 'text-emerald-600' :
-                    vault.status === 'locked' ? 'text-yellow-600' : 'text-purple-600'
+                    vault.status === 'active' ? 'text-green-600' :
+                    vault.status === 'locked' ? 'text-yellow-600' : 'text-primary-600'
                   }`}>
                     {vault.status === 'active' ? 'Ativo' :
                      vault.status === 'locked' ? 'Bloqueado' : 'Herança'}
@@ -278,9 +278,9 @@ export function AssetsPage() {
             hint="Máximo de 32 caracteres"
             maxLength={32}
           />
-          <div className="p-4 bg-emerald-50 rounded-lg">
-            <h4 className="font-medium text-emerald-900 mb-2">O que é um Vault?</h4>
-            <ul className="text-sm text-emerald-700 space-y-1">
+          <div className="p-4 bg-primary-50 rounded-lg">
+            <h4 className="font-medium text-primary-900 mb-2">O que é um Vault?</h4>
+            <ul className="text-sm text-primary-700 space-y-1">
               <li>- Cofre seguro para guardar seus SOL</li>
               <li>- Pode ser configurado com multisig</li>
               <li>- Permite adicionar beneficiários para herança</li>

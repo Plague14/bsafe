@@ -208,7 +208,7 @@ export function BeneficiariesPage() {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">Percentual alocado</p>
-            <p className={`text-2xl font-bold ${isFullyAllocated ? 'text-emerald-600' : 'text-gray-900'}`}>
+            <p className={`text-2xl font-bold ${isFullyAllocated ? 'text-green-600' : 'text-gray-900'}`}>
               {usedPercentage.toFixed(1)}%
             </p>
           </div>
@@ -231,12 +231,12 @@ export function BeneficiariesPage() {
 
       {/* Summary */}
       <div className="grid md:grid-cols-3 gap-4">
-        <Card className="bg-emerald-50 border-emerald-100">
-          <p className="text-sm text-emerald-700">Total de herdeiros</p>
+        <Card className="bg-primary-50 border-primary-100">
+          <p className="text-sm text-primary-700">Total de herdeiros</p>
           <p className="text-2xl font-bold text-gray-900">{activeBeneficiaries.length}</p>
         </Card>
-        <Card className={`${isFullyAllocated ? 'bg-emerald-50 border-emerald-100' : 'bg-yellow-50 border-yellow-100'}`}>
-          <p className={`text-sm ${isFullyAllocated ? 'text-emerald-700' : 'text-yellow-700'}`}>
+        <Card className={`${isFullyAllocated ? 'bg-green-50 border-green-100' : 'bg-yellow-50 border-yellow-100'}`}>
+          <p className={`text-sm ${isFullyAllocated ? 'text-green-700' : 'text-yellow-700'}`}>
             {isFullyAllocated ? 'Totalmente alocado' : 'Disponível para alocar'}
           </p>
           <p className="text-2xl font-bold text-gray-900">
@@ -263,8 +263,8 @@ export function BeneficiariesPage() {
             <Card key={beneficiary.address.toBase58()}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-emerald-600" />
+                  <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-primary-600" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export function BeneficiariesPage() {
                         className="p-0.5 hover:bg-gray-100 rounded"
                       >
                         {copied === beneficiary.wallet.toBase58() ? (
-                          <Check className="w-3 h-3 text-emerald-600" />
+                          <Check className="w-3 h-3 text-primary-600" />
                         ) : (
                           <Copy className="w-3 h-3 text-gray-400" />
                         )}
@@ -304,7 +304,7 @@ export function BeneficiariesPage() {
                   </div>
                   <button
                     onClick={() => handleEditBeneficiary(beneficiary)}
-                    className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
@@ -337,7 +337,7 @@ export function BeneficiariesPage() {
                     </div>
                     <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 rounded-full"
+                        className="h-full bg-primary-500 rounded-full"
                         style={{ width: `${beneficiary.sharePercent}%` }}
                       />
                     </div>
@@ -423,7 +423,7 @@ export function BeneficiariesPage() {
               max={100}
               value={form.sharePercent}
               onChange={e => setForm({ ...form, sharePercent: Math.min(100, Math.max(1, Number(e.target.value))) })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 mb-2"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-2"
             />
             <input
               type="range"
@@ -431,7 +431,7 @@ export function BeneficiariesPage() {
               max={100}
               value={form.sharePercent}
               onChange={e => setForm({ ...form, sharePercent: Number(e.target.value) })}
-              className="w-full accent-emerald-600"
+              className="w-full accent-primary-600"
             />
             <div className="flex justify-between text-xs mt-1">
               <span className="text-gray-500">1%</span>
@@ -511,7 +511,7 @@ export function BeneficiariesPage() {
                 max={100}
                 value={editSharePercent}
                 onChange={e => setEditSharePercent(Math.min(100, Math.max(1, Number(e.target.value))))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 mb-2"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-2"
               />
               <input
                 type="range"
@@ -519,7 +519,7 @@ export function BeneficiariesPage() {
                 max={100}
                 value={editSharePercent}
                 onChange={e => setEditSharePercent(Number(e.target.value))}
-                className="w-full accent-emerald-600"
+                className="w-full accent-primary-600"
               />
               {(() => {
                 const otherBeneficiariesTotal = activeBeneficiaries
@@ -545,10 +545,10 @@ export function BeneficiariesPage() {
               })()}
             </div>
 
-            <div className="p-4 bg-emerald-50 rounded-lg">
+            <div className="p-4 bg-primary-50 rounded-lg">
               <div className="flex justify-between text-sm">
-                <span className="text-emerald-700">Valor estimado</span>
-                <span className="font-medium text-emerald-900">
+                <span className="text-primary-700">Valor estimado</span>
+                <span className="font-medium text-primary-900">
                   {((editSharePercent / 100) * (selectedVault?.balance || 0)).toFixed(4)} SOL
                 </span>
               </div>

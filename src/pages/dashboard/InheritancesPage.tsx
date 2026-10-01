@@ -166,7 +166,7 @@ export function InheritancesPage() {
                   </p>
                   <div className="flex gap-2 mt-2">
                     {beneficiary && (
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary-100 text-primary-700">
                         Herdeiro · {beneficiary.sharePercent}%
                       </span>
                     )}
@@ -197,8 +197,8 @@ export function InheritancesPage() {
                     <div className="grid grid-cols-4 gap-2 mb-4">
                       {STEPS.map((label, i) => (
                         <div key={label} className="text-center">
-                          <div className={`h-1.5 rounded-full mb-1 ${i <= current ? 'bg-emerald-500' : 'bg-gray-200'}`} />
-                          <span className={`text-xs ${i <= current ? 'text-emerald-700 font-medium' : 'text-gray-400'}`}>
+                          <div className={`h-1.5 rounded-full mb-1 ${i <= current ? 'bg-primary-500' : 'bg-gray-200'}`} />
+                          <span className={`text-xs ${i <= current ? 'text-primary-700 font-medium' : 'text-gray-400'}`}>
                             {label}
                           </span>
                         </div>
@@ -250,7 +250,7 @@ export function InheritancesPage() {
                         <FileText className="w-4 h-4" />
                         Certidão enviada
                         {proof.verified ? (
-                          <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">verificada</span>
+                          <span className="text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full">verificada</span>
                         ) : (
                           <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
                             {plan.currentVerifications} de {plan.requiredVerifications} verificações
@@ -333,7 +333,7 @@ export function InheritancesPage() {
                     )}
 
                     {beneficiary?.status === 'claimed' && (
-                      <span className="text-sm text-emerald-700 flex items-center gap-1">
+                      <span className="text-sm text-green-700 flex items-center gap-1">
                         <CheckCircle className="w-4 h-4" />
                         Resgatado: {beneficiary.claimedAmount.toFixed(4)} SOL
                       </span>
@@ -342,7 +342,7 @@ export function InheritancesPage() {
 
                   {checkedHash[key] && proof && (
                     <p className={`mt-3 text-xs p-2 rounded ${
-                      checkedHash[key] === proof.documentHash ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                      checkedHash[key] === proof.documentHash ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
                     }`}>
                       {checkedHash[key] === proof.documentHash
                         ? 'O documento confere com o hash registrado on-chain.'
