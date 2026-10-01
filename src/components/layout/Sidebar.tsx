@@ -27,7 +27,7 @@ export function Sidebar() {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         <div className="h-16 px-6 flex items-center justify-between border-b border-gray-100">
-          <span className="text-xl font-bold text-primary-600">BSafe</span>
+          <img src="/images/logo-fundo-azul.png" alt="BSafe" className="w-10 h-10 rounded-lg" />
           <button onClick={toggleSidebar} className="lg:hidden p-1 rounded-lg text-gray-400 hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>

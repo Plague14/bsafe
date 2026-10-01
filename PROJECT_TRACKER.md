@@ -32,7 +32,11 @@ Verificado nesta data (build + testes executados, não só código escrito):
 - [x] 9/9 testes de integração; binário da devnet = build local (SHA-256)
 - [x] App ficava em branco (router sem basename para /bsafe/) — corrigido
 - [ ] Resgate (claim) testado só no LiteSVM — na devnet exige esperar o cooldown mínimo de 1 dia
-- [ ] Deploy do frontend (Vercel), screenshots, vídeos, submission
+- [x] Frontend no ar: https://bsafe-jade.vercel.app (Vercel, deploy automático a cada push em master)
+- [x] Identidade visual azul + branco (sem modo escuro), README com screenshots e instruções reais
+- [x] Repositório público limpo: https://github.com/Plague14/bsafe (CI verde)
+- [ ] Configurar `VITE_RPC_URL` na Vercel (RPC devnet com mais limite)
+- [ ] Vídeo de pitch, vídeo de demo e submission no portal do Colosseum
 
 ## Status Geral (histórico — superestimado, ver "Status Real" acima)
 - [x] Fase 1: Infraestrutura — ✅

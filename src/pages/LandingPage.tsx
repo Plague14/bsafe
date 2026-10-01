@@ -27,9 +27,8 @@ export function LandingPage() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/images/logo-fundo-azul.png" alt="BSafe" className="w-9 h-9 rounded-lg" />
-            <span className="text-xl font-bold text-primary-700">BSafe</span>
+          <Link to="/" aria-label="BSafe">
+            <img src="/images/logo-fundo-azul.png" alt="BSafe" className="w-10 h-10 rounded-lg" />
           </Link>
           <nav className="hidden md:flex items-center gap-8">
             <a href="#recursos" className="text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">Recursos</a>
@@ -182,14 +181,11 @@ export function LandingPage() {
       {/* Footer */}
       <footer id="sobre" className="py-12 px-4 border-t border-gray-200 bg-gray-50">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="flex items-center gap-2">
-            <img src="/images/logo-fundo-azul.png" alt="BSafe" className="w-7 h-7 rounded-md" />
-            <span className="text-lg font-bold text-primary-700">BSafe</span>
-          </span>
+          <img src="/images/logo-fundo-azul.png" alt="BSafe" className="w-9 h-9 rounded-lg" />
           <div className="flex gap-6 text-sm text-gray-500">
-            <a href="#" className="hover:text-primary-600 transition-colors">GitHub</a>
-            <a href="#" className="hover:text-primary-600 transition-colors">Docs</a>
-            <a href="#" className="hover:text-primary-600 transition-colors">Discord</a>
+            <a href="https://github.com/Plague14/bsafe" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">GitHub</a>
+            <a href="https://github.com/Plague14/bsafe/blob/master/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Docs</a>
+            <a href="https://explorer.solana.com/address/3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv?cluster=devnet" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Explorer</a>
           </div>
           <p className="text-sm text-gray-500">
             Built for Colosseum Hackathon 2026
