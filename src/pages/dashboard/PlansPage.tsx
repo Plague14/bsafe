@@ -5,6 +5,7 @@ import { Card, Button, Input, Modal } from '../../components/ui';
 import { useProgram, type Vault, type InheritancePlan, type TriggerType, type Beneficiary, type Verifier } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
+import { useI18n } from '../../i18n';
 
 export function PlansPage() {
   const { publicKey } = useWallet();
@@ -22,6 +23,7 @@ export function PlansPage() {
     loading,
     error
   } = useProgram();
+  const { t, locale } = useI18n();
 
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
@@ -164,39 +166,39 @@ export function PlansPage() {
     const days = Math.floor(seconds / (24 * 60 * 60));
     if (days >= 365) {
       const years = Math.floor(days / 365);
-      return `${years} ano${years > 1 ? 's' : ''}`;
+      return t(years > 1 ? 'plans.years' : 'plans.year', { count: years });
     }
-    return `${days} dia${days > 1 ? 's' : ''}`;
+    return t(days > 1 ? 'plans.days' : 'plans.day', { count: days });
   };
 
   const formatTimeRemaining = (endTimestamp: number) => {
     const now = Date.now();
     const diff = endTimestamp - now;
-    if (diff <= 0) return 'Expirado';
+    if (diff <= 0) return t('plans.expired');
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    if (days > 0) return `${days}d ${hours}h restantes`;
-    return `${hours}h restantes`;
+    if (days > 0) return t('plans.remainingDays', { days, hours });
+    return t('plans.remainingHours', { hours });
   };
 
   const getTriggerTypeLabel = (type: TriggerType) => {
     switch (type) {
-      case 'deathCertificate': return 'Certidão de Óbito';
-      case 'deadmanSwitch': return 'Deadman Switch';
-      case 'both': return 'Híbrido (Ambos)';
+      case 'deathCertificate': return t('plans.triggerCertificate');
+      case 'deadmanSwitch': return t('plans.triggerDeadman');
+      case 'both': return t('plans.triggerBoth');
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'configured': return 'Configurado';
-      case 'proofSubmitted': return 'Prova Submetida';
-      case 'cooldownActive': return 'Cooldown Ativo';
-      case 'claimReady': return 'Pronto para Claim';
-      case 'completed': return 'Concluído';
-      case 'cancelled': return 'Cancelado';
+      case 'configured': return t('plans.statusConfigured');
+      case 'proofSubmitted': return t('plans.statusProofSubmitted');
+      case 'cooldownActive': return t('plans.statusCooldown');
+      case 'claimReady': return t('plans.statusClaimReady');
+      case 'completed': return t('plans.statusCompleted');
+      case 'cancelled': return t('plans.statusCancelled');
       default: return status;
     }
   };
@@ -240,27 +242,27 @@ export function PlansPage() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Plano de Herança</h1>
-            <p className="text-gray-500">Configure como seus ativos serão transferidos</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('nav.plans')}</h1>
+            <p className="text-gray-500">{t('plans.subtitle')}</p>
           </div>
         </div>
 
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between gap-4">
             <span>{error}</span>
-            <Button size="sm" variant="secondary" onClick={refreshVaults}>Tentar de novo</Button>
+            <Button size="sm" variant="secondary" onClick={refreshVaults}>{t('common.tryAgain')}</Button>
           </div>
         )}
 
         <Card className="text-center py-12">
           <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum vault encontrado</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('common.noVaultTitle')}</h3>
           <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            Você precisa criar um vault antes de configurar um plano de herança.
+            {t('plans.needVault')}
           </p>
           <Link to="/dashboard/assets">
             <Button icon={<Plus className="w-4 h-4" />}>
-              Criar Vault
+              {t('common.createVault')}
             </Button>
           </Link>
         </Card>
@@ -272,8 +274,8 @@ export function PlansPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Plano de Herança</h1>
-          <p className="text-gray-500">Configure como seus ativos serão transferidos</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('nav.plans')}</h1>
+          <p className="text-gray-500">{t('plans.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -283,7 +285,7 @@ export function PlansPage() {
             disabled={refreshing || !selectedVault}
             icon={<RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />}
           >
-            Atualizar
+            {t('common.refresh')}
           </Button>
           {!inheritancePlan && (
             <Button
@@ -292,7 +294,7 @@ export function PlansPage() {
               disabled={!selectedVault}
               icon={<Plus className="w-4 h-4" />}
             >
-              Criar Plano
+              {t('plans.createPlan')}
             </Button>
           )}
         </div>
@@ -302,7 +304,7 @@ export function PlansPage() {
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 mb-1">Vault selecionado</p>
+            <p className="text-sm text-gray-500 mb-1">{t('heirs.selectedVault')}</p>
             <select
               value={selectedVault?.address.toBase58() || ''}
               onChange={(e) => {
@@ -320,7 +322,7 @@ export function PlansPage() {
             </select>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-500">Beneficiários</p>
+            <p className="text-sm text-gray-500">{t('nav.beneficiaries')}</p>
             <p className="text-2xl font-bold text-gray-900">{beneficiaries.length}</p>
           </div>
         </div>
@@ -345,7 +347,7 @@ export function PlansPage() {
           }`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/70 text-sm mb-1">Status do Plano</p>
+                <p className="text-white/70 text-sm mb-1">{t('plans.planStatus')}</p>
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`px-2 py-1 rounded text-sm font-medium ${
                     inheritancePlan.status === 'cooldownActive'
@@ -376,7 +378,7 @@ export function PlansPage() {
                   onClick={() => setShowInitiateModal(true)}
                   icon={<Play className="w-4 h-4" />}
                 >
-                  Iniciar Herança (Teste)
+                  {t('plans.triggerInheritance')}
                 </Button>
               )}
               {canCancel && (
@@ -387,7 +389,7 @@ export function PlansPage() {
                   disabled={loading}
                   icon={<XCircle className="w-4 h-4" />}
                 >
-                  {loading ? 'Cancelando...' : 'Provar Vida (Cancelar)'}
+                  {loading ? t('plans.cancelling') : t('plans.proveAlive')}
                 </Button>
               )}
               {inheritancePlan.status === 'cancelled' && selectedVault?.owner.toBase58() === publicKey?.toBase58() && (
@@ -397,7 +399,7 @@ export function PlansPage() {
                   disabled={loading}
                   icon={<RefreshCw className="w-4 h-4" />}
                 >
-                  {loading ? 'Reativando...' : 'Reativar plano'}
+                  {loading ? t('plans.reactivating') : t('plans.reactivate')}
                 </Button>
               )}
               {canClaim && (
@@ -407,7 +409,7 @@ export function PlansPage() {
                   onClick={() => setShowClaimModal(true)}
                   icon={<CheckCircle className="w-4 h-4" />}
                 >
-                  Clamar Herança
+                  {t('plans.claim')}
                 </Button>
               )}
             </div>
@@ -418,10 +420,9 @@ export function PlansPage() {
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-orange-800">Herança Iniciada!</p>
+                <p className="font-medium text-orange-800">{t('plans.startedTitle')}</p>
                 <p className="text-sm text-orange-700">
-                  A herança foi ativada. Você tem até {new Date(inheritancePlan.cooldownEndsAt).toLocaleDateString('pt-BR')} para
-                  cancelar clicando em "Provar Vida". Após esse período, os beneficiários poderão clamar seus fundos.
+                  {t('plans.startedBody', { date: new Date(inheritancePlan.cooldownEndsAt).toLocaleDateString(locale) })}
                 </p>
               </div>
             </div>
@@ -433,11 +434,9 @@ export function PlansPage() {
             <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-primary-800">Você pode clamar sua herança!</p>
+                <p className="font-medium text-primary-800">{t('plans.canClaimTitle')}</p>
                 <p className="text-sm text-primary-700">
-                  Sua parte é de {userBeneficiary.sharePercent.toFixed(1)}%
-                  (≈ {((userBeneficiary.sharePercent / 100) * inheritancePlan.distributionAmount).toFixed(4)} SOL).
-                  Clique em "Clamar Herança" para receber seus fundos.
+                  {t('plans.canClaimBody', { percent: userBeneficiary.sharePercent.toFixed(1), amount: ((userBeneficiary.sharePercent / 100) * inheritancePlan.distributionAmount).toFixed(4) })}
                 </p>
               </div>
             </div>
@@ -451,7 +450,7 @@ export function PlansPage() {
                   <FileText className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Tipo de Trigger</p>
+                  <p className="text-sm text-gray-500">{t('plans.triggerType')}</p>
                   <p className="font-semibold text-gray-900">{getTriggerTypeLabel(inheritancePlan.triggerType)}</p>
                 </div>
               </div>
@@ -463,7 +462,7 @@ export function PlansPage() {
                   <Clock className="w-6 h-6 text-primary-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Período de Cooldown</p>
+                  <p className="text-sm text-gray-500">{t('plans.cooldownPeriod')}</p>
                   <p className="font-semibold text-gray-900">{formatDays(inheritancePlan.cooldownSeconds)}</p>
                 </div>
               </div>
@@ -487,7 +486,7 @@ export function PlansPage() {
                   <Users className="w-6 h-6 text-primary-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Verificações Necessárias</p>
+                  <p className="text-sm text-gray-500">{t('plans.requiredVerifications')}</p>
                   <p className="font-semibold text-gray-900">
                     {inheritancePlan.currentVerifications}/{inheritancePlan.requiredVerifications}
                   </p>
@@ -501,10 +500,10 @@ export function PlansPage() {
             <Card
               header={
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">Verificadores da certidão</span>
+                  <span className="font-semibold text-gray-900">{t('plans.verifiersTitle')}</span>
                   {inheritancePlan.status === 'configured' && (
                     <Button size="sm" onClick={() => setShowVerifierModal(true)} icon={<Plus className="w-4 h-4" />}>
-                      Adicionar
+                      {t('common.add')}
                     </Button>
                   )}
                 </div>
@@ -512,13 +511,12 @@ export function PlansPage() {
             >
               {verifiers.length < inheritancePlan.requiredVerifications && (
                 <p className="mb-3 text-sm text-amber-700 bg-amber-50 p-3 rounded-lg">
-                  O plano exige {inheritancePlan.requiredVerifications} verificação(ões), mas há {verifiers.length} verificador(es).
-                  Sem verificadores suficientes a certidão nunca poderá ser confirmada.
+                  {t('plans.notEnoughVerifiers', { required: inheritancePlan.requiredVerifications, count: verifiers.length })}
                 </p>
               )}
               {verifiers.length === 0 ? (
                 <p className="text-sm text-gray-500">
-                  Verificadores (advogado, cartório, familiar de confiança) confirmam a certidão de óbito enviada por um herdeiro.
+                  {t('plans.verifiersExplainer')}
                 </p>
               ) : (
                 <ul className="divide-y divide-gray-100">
@@ -529,10 +527,10 @@ export function PlansPage() {
                       </code>
                       {v.hasVerified ? (
                         <span className="flex items-center gap-1 text-green-700">
-                          <ShieldCheck className="w-4 h-4" /> Verificou
+                          <ShieldCheck className="w-4 h-4" /> {t('plans.verified')}
                         </span>
                       ) : (
-                        <span className="text-gray-400">Aguardando</span>
+                        <span className="text-gray-400">{t('plans.waiting')}</span>
                       )}
                     </li>
                   ))}
@@ -543,25 +541,24 @@ export function PlansPage() {
 
           {/* Distribution Preview */}
           {inheritancePlan.distributionAmount > 0 && (
-            <Card header={<span className="font-semibold text-gray-900">Valor a Distribuir</span>}>
+            <Card header={<span className="font-semibold text-gray-900">{t('plans.amountToDistribute')}</span>}>
               <div className="text-center py-4">
                 <p className="text-4xl font-bold text-gray-900">{inheritancePlan.distributionAmount.toFixed(4)} SOL</p>
-                <p className="text-gray-500">Valor capturado no momento do trigger</p>
+                <p className="text-gray-500">{t('plans.amountCaptured')}</p>
               </div>
             </Card>
           )}
 
           {/* How it works */}
-          <Card header={<span className="font-semibold text-gray-900">Como funciona?</span>}>
+          <Card header={<span className="font-semibold text-gray-900">{t('landing.howTitle')}</span>}>
             <div className="space-y-4">
               {inheritancePlan.triggerType !== 'deathCertificate' && (
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm">1</div>
                   <div>
-                    <p className="font-medium text-gray-900">Deadman Switch</p>
+                    <p className="font-medium text-gray-900">{t('plans.triggerDeadman')}</p>
                     <p className="text-sm text-gray-500">
-                      Se você não interagir com o vault por {formatDays(inheritancePlan.deadmanSwitchSeconds)},
-                      a herança será iniciada automaticamente.
+                      {t('plans.howDeadman', { period: formatDays(inheritancePlan.deadmanSwitchSeconds) })}
                     </p>
                   </div>
                 </div>
@@ -572,9 +569,9 @@ export function PlansPage() {
                     {inheritancePlan.triggerType === 'deathCertificate' ? '1' : '2'}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Certidão de Óbito</p>
+                    <p className="font-medium text-gray-900">{t('plans.triggerCertificate')}</p>
                     <p className="text-sm text-gray-500">
-                      Um beneficiário pode submeter uma certidão de óbito que será verificada por {inheritancePlan.requiredVerifications} verificador(es).
+                      {t('plans.howCertificate', { count: inheritancePlan.requiredVerifications })}
                     </p>
                   </div>
                 </div>
@@ -584,9 +581,9 @@ export function PlansPage() {
                   {inheritancePlan.triggerType === 'both' ? '3' : '2'}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Período de Cooldown</p>
+                  <p className="font-medium text-gray-900">{t('plans.cooldownPeriod')}</p>
                   <p className="text-sm text-gray-500">
-                    Após a ativação, você tem {formatDays(inheritancePlan.cooldownSeconds)} para cancelar (provar que está vivo).
+                    {t('plans.howCooldown', { period: formatDays(inheritancePlan.cooldownSeconds) })}
                   </p>
                 </div>
               </div>
@@ -595,9 +592,9 @@ export function PlansPage() {
                   {inheritancePlan.triggerType === 'both' ? '4' : '3'}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Distribuição</p>
+                  <p className="font-medium text-gray-900">{t('plans.distribution')}</p>
                   <p className="text-sm text-gray-500">
-                    Após o cooldown, os beneficiários podem clamar suas partes conforme definido.
+                    {t('plans.howDistribution')}
                   </p>
                 </div>
               </div>
@@ -607,7 +604,7 @@ export function PlansPage() {
       ) : (
         <div className="space-y-4">
           {/* Validation checklist */}
-          <Card header={<span className="font-semibold text-gray-900">Requisitos para criar plano</span>}>
+          <Card header={<span className="font-semibold text-gray-900">{t('plans.requirementsTitle')}</span>}>
             <div className="space-y-3">
               <div className={`flex items-center gap-3 p-3 rounded-lg ${hasBeneficiaries ? 'bg-green-50' : 'bg-red-50'}`}>
                 {hasBeneficiaries ? (
@@ -617,12 +614,12 @@ export function PlansPage() {
                 )}
                 <div>
                   <p className={`font-medium ${hasBeneficiaries ? 'text-green-900' : 'text-red-900'}`}>
-                    Beneficiários cadastrados
+                    {t('plans.reqHeirs')}
                   </p>
                   <p className={`text-sm ${hasBeneficiaries ? 'text-green-700' : 'text-red-700'}`}>
                     {hasBeneficiaries
-                      ? `${beneficiaries.length} beneficiário(s) adicionado(s)`
-                      : 'Adicione pelo menos 1 beneficiário'}
+                      ? t('plans.reqHeirsOk', { count: beneficiaries.length })
+                      : t('plans.reqHeirsMissing')}
                   </p>
                 </div>
               </div>
@@ -635,12 +632,12 @@ export function PlansPage() {
                 )}
                 <div>
                   <p className={`font-medium ${isFullyAllocated ? 'text-green-900' : 'text-red-900'}`}>
-                    Alocação completa (100%)
+                    {t('plans.reqAllocation')}
                   </p>
                   <p className={`text-sm ${isFullyAllocated ? 'text-green-700' : 'text-red-700'}`}>
                     {isFullyAllocated
-                      ? 'Soma das porcentagens = 100%'
-                      : `Atual: ${totalBeneficiaryPercent.toFixed(1)}% (faltam ${(100 - totalBeneficiaryPercent).toFixed(1)}%)`}
+                      ? t('plans.reqAllocationOk')
+                      : t('plans.reqAllocationMissing', { current: totalBeneficiaryPercent.toFixed(1), missing: (100 - totalBeneficiaryPercent).toFixed(1) })}
                   </p>
                 </div>
               </div>
@@ -650,7 +647,7 @@ export function PlansPage() {
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <Link to="/dashboard/beneficiaries">
                   <Button variant="secondary" size="sm" icon={<Users className="w-4 h-4" />}>
-                    Configurar Beneficiários
+                    {t('plans.configureHeirs')}
                   </Button>
                 </Link>
               </div>
@@ -659,20 +656,20 @@ export function PlansPage() {
 
           <Card className="text-center py-12">
             <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum plano de herança</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('plans.emptyTitle')}</h3>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Configure um plano de herança para definir como seus ativos serão transferidos automaticamente.
+              {t('plans.emptyBody')}
             </p>
             <Button
               onClick={() => setShowCreateModal(true)}
               icon={<Plus className="w-4 h-4" />}
               disabled={!canCreatePlan}
             >
-              Criar Plano de Herança
+              {t('plans.createInheritancePlan')}
             </Button>
             {!canCreatePlan && (
               <p className="text-sm text-gray-500 mt-2">
-                Complete os requisitos acima para criar o plano
+                {t('plans.completeRequirements')}
               </p>
             )}
           </Card>
@@ -683,14 +680,14 @@ export function PlansPage() {
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Criar Plano de Herança"
+        title={t('plans.createInheritancePlan')}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleCreatePlan} disabled={loading}>
-              {loading ? 'Criando...' : 'Criar Plano'}
+              {loading ? t('assets.creating') : t('plans.createPlan')}
             </Button>
           </div>
         }
@@ -698,25 +695,25 @@ export function PlansPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Tipo de Trigger
+              {t('plans.triggerType')}
             </label>
             <select
               value={form.triggerType}
               onChange={(e) => setForm({ ...form, triggerType: e.target.value as TriggerType })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
-              <option value="both">Híbrido (Recomendado)</option>
-              <option value="deadmanSwitch">Apenas Deadman Switch</option>
-              <option value="deathCertificate">Apenas Certidão de Óbito</option>
+              <option value="both">{t('plans.optionBoth')}</option>
+              <option value="deadmanSwitch">{t('plans.optionDeadman')}</option>
+              <option value="deathCertificate">{t('plans.optionCertificate')}</option>
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Híbrido permite ativação por inatividade OU certidão de óbito.
+              {t('plans.hybridHint')}
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Período de Cooldown: {form.cooldownDays} dias
+              {t('plans.cooldownLabel', { days: form.cooldownDays })}
             </label>
             <input
               type="range"
@@ -727,18 +724,18 @@ export function PlansPage() {
               className="w-full accent-primary-600"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>1 dia</span>
-              <span>365 dias</span>
+              <span>{t('plans.day', { count: 1 })}</span>
+              <span>{t('plans.days', { count: 365 })}</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Tempo que você tem para cancelar a herança após ser ativada.
+              {t('plans.cooldownHint')}
             </p>
           </div>
 
           {form.triggerType !== 'deathCertificate' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Deadman Switch: {form.deadmanSwitchDays} dias
+                {t('plans.deadmanLabel', { days: form.deadmanSwitchDays })}
               </label>
               <input
                 type="range"
@@ -749,11 +746,11 @@ export function PlansPage() {
                 className="w-full accent-primary-600"
               />
               <div className="flex justify-between text-xs text-gray-500">
-                <span>30 dias</span>
-                <span>5 anos</span>
+                <span>{t('plans.days', { count: 30 })}</span>
+                <span>{t('plans.years', { count: 5 })}</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Período de inatividade que ativa a herança automaticamente.
+                {t('plans.deadmanHint')}
               </p>
             </div>
           )}
@@ -761,7 +758,7 @@ export function PlansPage() {
           {form.triggerType !== 'deadmanSwitch' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Verificações necessárias: {form.requiredVerifications}
+                {t('plans.verificationsLabel', { count: form.requiredVerifications })}
               </label>
               <input
                 type="range"
@@ -776,7 +773,7 @@ export function PlansPage() {
                 <span>10</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Número de verificadores que precisam confirmar a certidão de óbito.
+                {t('plans.verificationsHint')}
               </p>
             </div>
           )}
@@ -785,10 +782,9 @@ export function PlansPage() {
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-700">
-                <p className="font-medium">Importante</p>
+                <p className="font-medium">{t('plans.importantTitle')}</p>
                 <p>
-                  Os herdeiros precisam somar 100% antes de criar o plano. Se o gatilho usar certidão de óbito,
-                  adicione os verificadores logo depois de criar o plano.
+                  {t('plans.importantBody')}
                 </p>
               </div>
             </div>
@@ -800,11 +796,11 @@ export function PlansPage() {
       <Modal
         isOpen={showInitiateModal}
         onClose={() => setShowInitiateModal(false)}
-        title="Iniciar Herança (Teste)"
+        title={t('plans.triggerInheritance')}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowInitiateModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -812,7 +808,7 @@ export function PlansPage() {
               disabled={loading}
               className="bg-orange-600 hover:bg-orange-700"
             >
-              {loading ? 'Iniciando...' : 'Confirmar Início'}
+              {loading ? t('plans.starting') : t('plans.confirmStart')}
             </Button>
           </div>
         }
@@ -822,23 +818,20 @@ export function PlansPage() {
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-orange-700">
-                <p className="font-medium">Atenção: Modo de Teste</p>
+                <p className="font-medium">{t('plans.triggerWarningTitle')}</p>
                 <p>
-                  Esta ação simula o trigger da herança para fins de teste.
-                  Em produção, isso seria ativado pelo deadman switch ou certidão de óbito.
+                  {t('plans.triggerWarningBody')}
                 </p>
               </div>
             </div>
           </div>
 
           <p className="text-gray-600">
-            Ao confirmar, a herança será iniciada e você terá{' '}
-            <strong>{formatDays(inheritancePlan?.cooldownSeconds || 0)}</strong> para cancelar
-            (provar que está vivo).
+            {t('plans.confirmStartBody', { period: formatDays(inheritancePlan?.cooldownSeconds || 0) })}
           </p>
 
           <p className="text-gray-600">
-            Após o período de cooldown, os beneficiários poderão clamar seus fundos:
+            {t('plans.afterCooldownHeirs')}
           </p>
 
           <div className="p-3 bg-gray-50 rounded-lg space-y-2">
@@ -856,14 +849,14 @@ export function PlansPage() {
       <Modal
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
-        title="Clamar Herança"
+        title={t('plans.claim')}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowClaimModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleClaimInheritance} disabled={loading}>
-              {loading ? 'Clamando...' : 'Confirmar Claim'}
+              {loading ? t('plans.claiming') : t('plans.confirmClaim')}
             </Button>
           </div>
         }
@@ -871,21 +864,21 @@ export function PlansPage() {
         {userBeneficiary && inheritancePlan && (
           <div className="space-y-4">
             <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg text-center">
-              <p className="text-sm text-primary-700 mb-1">Valor a receber</p>
+              <p className="text-sm text-primary-700 mb-1">{t('plans.amountToReceive')}</p>
               <p className="text-3xl font-bold text-primary-700">
                 {((userBeneficiary.sharePercent / 100) * inheritancePlan.distributionAmount).toFixed(4)} SOL
               </p>
               <p className="text-sm text-primary-600 mt-1">
-                ({userBeneficiary.sharePercent.toFixed(1)}% de {inheritancePlan.distributionAmount.toFixed(4)} SOL)
+                {t('plans.shareOf', { percent: userBeneficiary.sharePercent.toFixed(1), total: inheritancePlan.distributionAmount.toFixed(4) })}
               </p>
             </div>
 
             <p className="text-gray-600 text-sm">
-              Ao confirmar, os fundos serão transferidos diretamente para sua carteira conectada.
+              {t('plans.claimTransferNote')}
             </p>
 
             <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500">Sua carteira</p>
+              <p className="text-xs text-gray-500">{t('plans.yourWallet')}</p>
               <code className="text-sm font-medium text-gray-900">
                 {publicKey?.toBase58()}
               </code>
@@ -897,26 +890,26 @@ export function PlansPage() {
       <Modal
         isOpen={showVerifierModal}
         onClose={() => setShowVerifierModal(false)}
-        title="Adicionar verificador"
+        title={t('plans.addVerifier')}
         footer={
           <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setShowVerifierModal(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setShowVerifierModal(false)}>{t('common.cancel')}</Button>
             <Button onClick={handleAddVerifier} disabled={loading || !parsedVerifier}>
-              {loading ? 'Adicionando...' : 'Adicionar'}
+              {loading ? t('common.adding') : t('common.add')}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <Input
-            label="Carteira do verificador"
+            label={t('plans.verifierWallet')}
             value={verifierAddress}
             onChange={e => setVerifierAddress(e.target.value)}
-            placeholder="Endereço Solana"
-            error={verifierAddress && !parsedVerifier ? 'Endereço inválido' : undefined}
+            placeholder={t('common.solanaAddress')}
+            error={verifierAddress && !parsedVerifier ? t('common.invalidAddress') : undefined}
           />
           <p className="text-xs text-gray-500">
-            O verificador vê a certidão pendente em "Minhas Heranças" e confirma on-chain.
+            {t('plans.verifierNote')}
           </p>
         </div>
       </Modal>

@@ -5,10 +5,12 @@ import { useProgram, type Vault, type Beneficiary } from '../../hooks/useProgram
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { Link } from 'react-router-dom';
+import { useI18n } from '../../i18n';
 
 export function BeneficiariesPage() {
   const { publicKey } = useWallet();
   const { getVaults, getBeneficiaries, addBeneficiary, updateBeneficiaryShares, removeBeneficiary, loading, error } = useProgram();
+  const { t, locale } = useI18n();
 
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selectedVault, setSelectedVault] = useState<Vault | null>(null);
@@ -101,7 +103,7 @@ export function BeneficiariesPage() {
 
   const handleRemoveBeneficiary = async (beneficiary: Beneficiary) => {
     if (!selectedVault) return;
-    if (!window.confirm('Remover este herdeiro? A parte dele volta a ficar disponível para redistribuir.')) return;
+    if (!window.confirm(t('heirs.confirmRemove'))) return;
     if (await removeBeneficiary(selectedVault.address, beneficiary.wallet)) {
       await refreshBeneficiaries();
     }
@@ -128,27 +130,27 @@ export function BeneficiariesPage() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Herdeiros</h1>
-            <p className="text-gray-500">Gerencie quem receberá seus ativos</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('heirs.title')}</h1>
+            <p className="text-gray-500">{t('heirs.subtitle')}</p>
           </div>
         </div>
 
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between gap-4">
             <span>{error}</span>
-            <Button size="sm" variant="secondary" onClick={refreshVaults}>Tentar de novo</Button>
+            <Button size="sm" variant="secondary" onClick={refreshVaults}>{t('common.tryAgain')}</Button>
           </div>
         )}
 
         <Card className="text-center py-12">
           <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum vault encontrado</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('common.noVaultTitle')}</h3>
           <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            Você precisa criar um vault antes de adicionar beneficiários.
+            {t('heirs.needVault')}
           </p>
           <Link to="/dashboard/assets">
             <Button icon={<Plus className="w-4 h-4" />}>
-              Criar Vault
+              {t('common.createVault')}
             </Button>
           </Link>
         </Card>
@@ -160,8 +162,8 @@ export function BeneficiariesPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Herdeiros</h1>
-          <p className="text-gray-500">Gerencie quem receberá seus ativos</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('heirs.title')}</h1>
+          <p className="text-gray-500">{t('heirs.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -171,7 +173,7 @@ export function BeneficiariesPage() {
             disabled={refreshing || !selectedVault}
             icon={<RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />}
           >
-            Atualizar
+            {t('common.refresh')}
           </Button>
           <Button
             size="sm"
@@ -179,7 +181,7 @@ export function BeneficiariesPage() {
             disabled={!selectedVault || isFullyAllocated}
             icon={<Plus className="w-4 h-4" />}
           >
-            Adicionar
+            {t('common.add')}
           </Button>
         </div>
       </div>
@@ -188,7 +190,7 @@ export function BeneficiariesPage() {
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 mb-1">Vault selecionado</p>
+            <p className="text-sm text-gray-500 mb-1">{t('heirs.selectedVault')}</p>
             <div className="flex items-center gap-2">
               <select
                 value={selectedVault?.address.toBase58() || ''}
@@ -207,7 +209,7 @@ export function BeneficiariesPage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-500">Percentual alocado</p>
+            <p className="text-sm text-gray-500">{t('heirs.allocated')}</p>
             <p className={`text-2xl font-bold ${isFullyAllocated ? 'text-green-600' : 'text-gray-900'}`}>
               {usedPercentage.toFixed(1)}%
             </p>
@@ -220,10 +222,9 @@ export function BeneficiariesPage() {
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-yellow-800">Alocação incompleta</p>
+            <p className="font-medium text-yellow-800">{t('heirs.incompleteTitle')}</p>
             <p className="text-sm text-yellow-700">
-              Você tem {availablePercentage.toFixed(1)}% não alocado. Para garantir que 100% dos ativos
-              sejam distribuídos, ajuste as porcentagens dos beneficiários.
+              {t('heirs.incompleteBody', { percent: availablePercentage.toFixed(1) })}
             </p>
           </div>
         </div>
@@ -232,19 +233,19 @@ export function BeneficiariesPage() {
       {/* Summary */}
       <div className="grid md:grid-cols-3 gap-4">
         <Card className="bg-primary-50 border-primary-100">
-          <p className="text-sm text-primary-700">Total de herdeiros</p>
+          <p className="text-sm text-primary-700">{t('heirs.totalHeirs')}</p>
           <p className="text-2xl font-bold text-gray-900">{activeBeneficiaries.length}</p>
         </Card>
         <Card className={`${isFullyAllocated ? 'bg-green-50 border-green-100' : 'bg-yellow-50 border-yellow-100'}`}>
           <p className={`text-sm ${isFullyAllocated ? 'text-green-700' : 'text-yellow-700'}`}>
-            {isFullyAllocated ? 'Totalmente alocado' : 'Disponível para alocar'}
+            {isFullyAllocated ? t('heirs.fullyAllocated') : t('heirs.availableToAllocate')}
           </p>
           <p className="text-2xl font-bold text-gray-900">
             {isFullyAllocated ? '100%' : `${availablePercentage.toFixed(1)}%`}
           </p>
         </Card>
         <Card className="bg-blue-50 border-blue-100">
-          <p className="text-sm text-blue-700">Valor no vault</p>
+          <p className="text-sm text-blue-700">{t('heirs.vaultValue')}</p>
           <p className="text-2xl font-bold text-gray-900">{selectedVault?.balance.toFixed(4) || 0} SOL</p>
         </Card>
       </div>
@@ -258,7 +259,7 @@ export function BeneficiariesPage() {
       {/* Beneficiaries List */}
       {activeBeneficiaries.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Lista de Herdeiros</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('heirs.list')}</h2>
           {activeBeneficiaries.map(beneficiary => (
             <Card key={beneficiary.address.toBase58()}>
               <div className="flex items-center justify-between">
@@ -291,7 +292,7 @@ export function BeneficiariesPage() {
                       </a>
                     </div>
                     <p className="text-sm text-gray-500">
-                      Adicionado em {new Date(beneficiary.addedAt).toLocaleDateString('pt-BR')}
+                      {t('heirs.addedOn', { date: new Date(beneficiary.addedAt).toLocaleDateString(locale) })}
                     </p>
                   </div>
                 </div>
@@ -312,7 +313,7 @@ export function BeneficiariesPage() {
                     onClick={() => handleRemoveBeneficiary(beneficiary)}
                     disabled={loading}
                     className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                    title="Remover herdeiro"
+                    title={t('heirs.remove')}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -322,7 +323,7 @@ export function BeneficiariesPage() {
           ))}
 
           {/* Distribution Preview */}
-          <Card header={<span className="font-semibold text-gray-900">Previsão de Distribuição</span>}>
+          <Card header={<span className="font-semibold text-gray-900">{t('heirs.distributionPreview')}</span>}>
             <div className="space-y-3">
               {activeBeneficiaries.map(beneficiary => (
                 <div key={beneficiary.address.toBase58()} className="flex items-center gap-3">
@@ -351,7 +352,7 @@ export function BeneficiariesPage() {
                 <div className="flex items-center gap-3 opacity-50">
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-gray-400">Não alocado</span>
+                      <span className="text-sm text-gray-400">{t('heirs.unallocated')}</span>
                       <span className="text-sm font-medium text-gray-400">
                         {availablePercentage.toFixed(1)}%
                       </span>
@@ -374,10 +375,10 @@ export function BeneficiariesPage() {
       ) : (
         <Card className="text-center py-12">
           <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum herdeiro</h3>
-          <p className="text-gray-500 mb-6">Adicione herdeiros para definir a divisão dos seus ativos</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('heirs.emptyTitle')}</h3>
+          <p className="text-gray-500 mb-6">{t('heirs.emptyBody')}</p>
           <Button onClick={() => setShowAddModal(true)} icon={<Plus className="w-4 h-4" />}>
-            Adicionar primeiro herdeiro
+            {t('heirs.addFirst')}
           </Button>
         </Card>
       )}
@@ -389,33 +390,33 @@ export function BeneficiariesPage() {
           setShowAddModal(false);
           setForm({ walletAddress: '', sharePercent: Math.min(50, availablePercentage) });
         }}
-        title="Adicionar Herdeiro"
+        title={t('heirs.addTitle')}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleAddBeneficiary}
               disabled={!form.walletAddress || form.sharePercent > availablePercentage || loading}
             >
-              {loading ? 'Adicionando...' : 'Adicionar'}
+              {loading ? t('common.adding') : t('common.add')}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <Input
-            label="Endereço da Carteira (Solana)"
+            label={t('heirs.walletLabel')}
             value={form.walletAddress}
             onChange={e => setForm({ ...form, walletAddress: e.target.value })}
-            placeholder="Ex: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
-            hint="Endereço Solana do beneficiário"
+            placeholder={t('heirs.walletPlaceholder')}
+            hint={t('heirs.walletHint')}
           />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Percentual: {form.sharePercent}%
+              {t('heirs.shareLabel', { percent: form.sharePercent })}
             </label>
             <input
               type="number"
@@ -436,30 +437,30 @@ export function BeneficiariesPage() {
             <div className="flex justify-between text-xs mt-1">
               <span className="text-gray-500">1%</span>
               <span className={form.sharePercent > availablePercentage ? 'text-red-500 font-medium' : 'text-gray-500'}>
-                Disponível: {availablePercentage.toFixed(1)}%
+                {t('heirs.availablePercent', { percent: availablePercentage.toFixed(1) })}
               </span>
             </div>
             {form.sharePercent > availablePercentage && (
               <p className="text-xs text-red-500 mt-1">
-                Excede o disponível! Ajuste as porcentagens dos outros beneficiários primeiro.
+                {t('heirs.exceedsAvailable')}
               </p>
             )}
           </div>
 
           {selectedVault && (
             <div className="p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Resumo</h4>
+              <h4 className="font-medium text-gray-900 mb-2">{t('heirs.summary')}</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>Vault</span>
                   <span>{selectedVault.name || 'Vault'}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Saldo atual</span>
+                  <span>{t('assets.currentBalance')}</span>
                   <span>{selectedVault.balance.toFixed(4)} SOL</span>
                 </div>
                 <div className="flex justify-between text-gray-900 font-medium">
-                  <span>Valor estimado para herdeiro</span>
+                  <span>{t('heirs.estimatedForHeir')}</span>
                   <span>{((form.sharePercent / 100) * selectedVault.balance).toFixed(4)} SOL</span>
                 </div>
               </div>
@@ -472,11 +473,11 @@ export function BeneficiariesPage() {
       <Modal
         isOpen={!!showEditModal}
         onClose={() => setShowEditModal(null)}
-        title="Editar Porcentagem"
+        title={t('heirs.editTitle')}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowEditModal(null)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleUpdateShares}
@@ -487,7 +488,7 @@ export function BeneficiariesPage() {
                 return otherTotal + editSharePercent > 100;
               })())}
             >
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? t('heirs.saving') : t('heirs.save')}
             </Button>
           </div>
         }
@@ -495,7 +496,7 @@ export function BeneficiariesPage() {
         {showEditModal && (
           <div className="space-y-4">
             <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Beneficiário</p>
+              <p className="text-sm text-gray-500">{t('heirs.heir')}</p>
               <code className="font-medium text-gray-900">
                 {formatAddress(showEditModal.wallet.toBase58())}
               </code>
@@ -503,7 +504,7 @@ export function BeneficiariesPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Nova Porcentagem: {editSharePercent}%
+                {t('heirs.newShare', { percent: editSharePercent })}
               </label>
               <input
                 type="number"
@@ -532,12 +533,12 @@ export function BeneficiariesPage() {
                     <div className="flex justify-between text-xs mt-1">
                       <span className="text-gray-500">1%</span>
                       <span className={!isValid ? 'text-red-500 font-medium' : 'text-gray-500'}>
-                        Total: {newTotal.toFixed(1)}%
+                        {t('heirs.total', { percent: newTotal.toFixed(1) })}
                       </span>
                     </div>
                     {!isValid && (
                       <p className="text-xs text-red-500 mt-1">
-                        A soma total excede 100%! Reduza a porcentagem.
+                        {t('heirs.totalExceeds')}
                       </p>
                     )}
                   </>
@@ -547,7 +548,7 @@ export function BeneficiariesPage() {
 
             <div className="p-4 bg-primary-50 rounded-lg">
               <div className="flex justify-between text-sm">
-                <span className="text-primary-700">Valor estimado</span>
+                <span className="text-primary-700">{t('heirs.estimatedValue')}</span>
                 <span className="font-medium text-primary-900">
                   {((editSharePercent / 100) * (selectedVault?.balance || 0)).toFixed(4)} SOL
                 </span>
@@ -555,7 +556,7 @@ export function BeneficiariesPage() {
             </div>
 
             <p className="text-xs text-gray-500">
-              Nota: Certifique-se de que a soma de todos os beneficiários seja 100% para distribuição completa.
+              {t('heirs.note100')}
             </p>
           </div>
         )}

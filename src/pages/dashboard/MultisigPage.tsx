@@ -9,6 +9,7 @@ import {
   type MultisigSigner,
   type MultisigTransaction,
 } from '../../hooks/useProgram';
+import { useI18n, type MessageKey } from '../../i18n';
 
 const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`;
 
@@ -20,11 +21,11 @@ function parseKey(value: string): PublicKey | null {
   }
 }
 
-const statusLabel: Record<MultisigTransaction['status'], { text: string; className: string }> = {
-  pending: { text: 'Pendente', className: 'bg-amber-100 text-amber-700' },
-  approved: { text: 'Aprovada', className: 'bg-green-100 text-green-700' },
-  executed: { text: 'Executada', className: 'bg-gray-100 text-gray-600' },
-  cancelled: { text: 'Rejeitada', className: 'bg-red-100 text-red-700' },
+const statusLabel: Record<MultisigTransaction['status'], { text: MessageKey; className: string }> = {
+  pending: { text: 'multisig.statusPending', className: 'bg-amber-100 text-amber-700' },
+  approved: { text: 'multisig.statusApproved', className: 'bg-green-100 text-green-700' },
+  executed: { text: 'multisig.statusExecuted', className: 'bg-gray-100 text-gray-600' },
+  cancelled: { text: 'multisig.statusRejected', className: 'bg-red-100 text-red-700' },
 };
 
 export function MultisigPage() {
@@ -44,6 +45,7 @@ export function MultisigPage() {
     loading,
     error,
   } = useProgram();
+  const { t, locale } = useI18n();
 
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [selected, setSelected] = useState<Vault | null>(null);
@@ -125,7 +127,7 @@ export function MultisigPage() {
     return (
       <Card className="text-center py-12">
         <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900">Conecte sua carteira</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('common.connectWallet')}</h3>
       </Card>
     );
   }
@@ -135,7 +137,7 @@ export function MultisigPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Multisig</h1>
-          <p className="text-gray-500">Saques que exigem várias assinaturas</p>
+          <p className="text-gray-500">{t('multisig.subtitle')}</p>
         </div>
         <Button
           size="sm"
@@ -144,7 +146,7 @@ export function MultisigPage() {
           disabled={refreshing}
           icon={<RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />}
         >
-          Atualizar
+          {t('common.refresh')}
         </Button>
       </div>
 
@@ -155,8 +157,8 @@ export function MultisigPage() {
       {vaults.length === 0 ? (
         <Card className="text-center py-12">
           <KeyRound className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum vault encontrado</h3>
-          <p className="text-gray-500">Crie um vault em Ativos ou peça para ser adicionado como signatário.</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('common.noVaultTitle')}</h3>
+          <p className="text-gray-500">{t('multisig.emptyBody')}</p>
         </Card>
       ) : (
         <>
@@ -173,7 +175,7 @@ export function MultisigPage() {
                 }`}
               >
                 {v.name || 'Vault'} · {v.balance.toFixed(3)} SOL
-                {publicKey && !v.owner.equals(publicKey) && <span className="ml-1 text-xs text-gray-400">(co-signatário)</span>}
+                {publicKey && !v.owner.equals(publicKey) && <span className="ml-1 text-xs text-gray-400">{t('multisig.coSigner')}</span>}
               </button>
             ))}
           </div>
@@ -184,29 +186,29 @@ export function MultisigPage() {
               <Card
                 header={
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-900">Signatários</span>
+                    <span className="font-semibold text-gray-900">{t('multisig.signers')}</span>
                     {isOwner && (
                       <Button size="sm" onClick={() => setShowAddSigner(true)} icon={<Plus className="w-4 h-4" />}>
-                        Adicionar
+                        {t('common.add')}
                       </Button>
                     )}
                   </div>
                 }
               >
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Assinaturas exigidas</span>
+                  <span className="text-gray-600">{t('multisig.requiredSignatures')}</span>
                   {selected.multisigEnabled ? (
                     <span className="font-semibold text-gray-900">
-                      {selected.multisigThreshold} de {selected.signerCount}
+                      {t('multisig.ofSigners', { threshold: selected.multisigThreshold, signers: selected.signerCount })}
                     </span>
                   ) : (
-                    <span className="text-gray-500">Multisig desativado</span>
+                    <span className="text-gray-500">{t('multisig.disabled')}</span>
                   )}
                 </div>
 
                 {signers.length === 0 ? (
                   <p className="text-sm text-gray-500">
-                    Nenhum signatário. Adicione você mesmo e pelo menos mais uma carteira para ativar o multisig.
+                    {t('multisig.noSigners')}
                   </p>
                 ) : (
                   <ul className="divide-y divide-gray-100">
@@ -218,10 +220,10 @@ export function MultisigPage() {
                           </span>
                           <code className="text-sm text-gray-700">{formatAddress(s.signer.toBase58())}</code>
                           {publicKey && s.signer.equals(publicKey) && (
-                            <span className="text-xs text-primary-600 font-medium">você</span>
+                            <span className="text-xs text-primary-600 font-medium">{t('common.you')}</span>
                           )}
                           {selected.owner.equals(s.signer) && (
-                            <span className="text-xs text-gray-400">dono</span>
+                            <span className="text-xs text-gray-400">{t('common.owner')}</span>
                           )}
                         </div>
                         {isOwner && (
@@ -229,7 +231,7 @@ export function MultisigPage() {
                             onClick={async () => afterAction(await removeSigner(selected.address, s.signer))}
                             disabled={loading}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50"
-                            title="Remover signatário"
+                            title={t('multisig.removeSigner')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -241,7 +243,7 @@ export function MultisigPage() {
 
                 {isOwner && selected.signerCount > 1 && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Alterar assinaturas exigidas</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('multisig.changeRequired')}</label>
                     <div className="flex gap-2">
                       {Array.from({ length: selected.signerCount }, (_, i) => i + 1).map(n => (
                         <button
@@ -263,7 +265,7 @@ export function MultisigPage() {
 
                 {isOwner && !mySigner && signers.length > 0 && (
                   <p className="mt-4 text-xs text-amber-700 bg-amber-50 p-3 rounded-lg">
-                    Você é o dono, mas não é signatário: adicione sua própria carteira para poder propor e aprovar saques.
+                    {t('multisig.ownerNotSigner')}
                   </p>
                 )}
               </Card>
@@ -272,17 +274,17 @@ export function MultisigPage() {
               <Card
                 header={
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-900">Propostas de saque</span>
+                    <span className="font-semibold text-gray-900">{t('multisig.proposals')}</span>
                     {mySigner && selected.multisigEnabled && selected.status === 'active' && (
                       <Button size="sm" onClick={openPropose} icon={<ArrowUpRight className="w-4 h-4" />}>
-                        Propor saque
+                        {t('multisig.propose')}
                       </Button>
                     )}
                   </div>
                 }
               >
                 {transactions.length === 0 ? (
-                  <p className="text-sm text-gray-500">Nenhuma proposta ainda.</p>
+                  <p className="text-sm text-gray-500">{t('multisig.noProposals')}</p>
                 ) : (
                   <ul className="space-y-3">
                     {transactions.map(tx => {
@@ -292,12 +294,12 @@ export function MultisigPage() {
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold text-gray-900">{tx.amount.toFixed(4)} SOL</span>
                             <span className={`text-xs font-medium px-2 py-1 rounded-full ${label.className}`}>
-                              {label.text}
+                              {t(label.text)}
                             </span>
                           </div>
                           <div className="text-xs text-gray-500 space-y-1 mb-3">
                             <div className="flex items-center gap-1">
-                              Para <code>{formatAddress(tx.destination.toBase58())}</code>
+                              {t('multisig.to')} <code>{formatAddress(tx.destination.toBase58())}</code>
                               <a
                                 href={`https://explorer.solana.com/address/${tx.destination.toBase58()}?cluster=devnet`}
                                 target="_blank"
@@ -307,11 +309,11 @@ export function MultisigPage() {
                               </a>
                             </div>
                             <div>
-                              Proposta por <code>{formatAddress(tx.proposer.toBase58())}</code> em{' '}
-                              {new Date(tx.proposedAt).toLocaleString('pt-BR')}
+                              {t('multisig.proposedBy')} <code>{formatAddress(tx.proposer.toBase58())}</code>{' '}
+                              {t('multisig.on', { date: new Date(tx.proposedAt).toLocaleString(locale) })}
                             </div>
                             <div className="font-medium text-gray-700">
-                              Aprovações: {tx.approvalCount} de {tx.threshold}
+                              {t('multisig.approvals', { count: tx.approvalCount, threshold: tx.threshold })}
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-2">
@@ -322,11 +324,11 @@ export function MultisigPage() {
                                 onClick={async () => afterAction(await approveTransaction(selected.address, tx.address))}
                                 icon={<Check className="w-4 h-4" />}
                               >
-                                Aprovar
+                                {t('multisig.approve')}
                               </Button>
                             )}
                             {tx.status === 'pending' && hasApproved(tx) && (
-                              <span className="text-xs text-gray-500 self-center">Você já aprovou</span>
+                              <span className="text-xs text-gray-500 self-center">{t('multisig.alreadyApproved')}</span>
                             )}
                             {tx.status === 'approved' && mySigner && (
                               <Button
@@ -335,7 +337,7 @@ export function MultisigPage() {
                                 onClick={async () => afterAction(await executeTransaction(selected.address, tx))}
                                 icon={<Play className="w-4 h-4" />}
                               >
-                                Executar
+                                {t('multisig.execute')}
                               </Button>
                             )}
                             {tx.status === 'pending' && isOwner && (
@@ -346,7 +348,7 @@ export function MultisigPage() {
                                 onClick={async () => afterAction(await rejectTransaction(selected.address, tx.address))}
                                 icon={<X className="w-4 h-4" />}
                               >
-                                Rejeitar
+                                {t('multisig.reject')}
                               </Button>
                             )}
                           </div>
@@ -365,23 +367,23 @@ export function MultisigPage() {
       <Modal
         isOpen={showAddSigner}
         onClose={() => setShowAddSigner(false)}
-        title="Adicionar signatário"
+        title={t('multisig.addSignerTitle')}
         footer={
           <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setShowAddSigner(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setShowAddSigner(false)}>{t('common.cancel')}</Button>
             <Button onClick={handleAddSigner} disabled={loading || !parseKey(newSigner)}>
-              {loading ? 'Adicionando...' : 'Adicionar'}
+              {loading ? t('common.adding') : t('common.add')}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <Input
-            label="Carteira do signatário"
+            label={t('multisig.signerWallet')}
             value={newSigner}
             onChange={e => setNewSigner(e.target.value)}
-            placeholder="Endereço Solana"
-            error={newSigner && !parseKey(newSigner) ? 'Endereço inválido' : undefined}
+            placeholder={t('common.solanaAddress')}
+            error={newSigner && !parseKey(newSigner) ? t('common.invalidAddress') : undefined}
           />
           {publicKey && !mySigner && (
             <button
@@ -389,11 +391,11 @@ export function MultisigPage() {
               onClick={() => setNewSigner(publicKey.toBase58())}
               className="text-sm text-primary-600 hover:underline"
             >
-              Usar minha carteira
+              {t('multisig.useMyWallet')}
             </button>
           )}
           <p className="text-xs text-gray-500">
-            Com 2 ou mais signatários o multisig é ativado exigindo 2 assinaturas; saques diretos passam a ser bloqueados.
+            {t('multisig.addSignerNote')}
           </p>
         </div>
       </Modal>
@@ -402,10 +404,10 @@ export function MultisigPage() {
       <Modal
         isOpen={showPropose}
         onClose={() => setShowPropose(false)}
-        title="Propor saque"
+        title={t('multisig.propose')}
         footer={
           <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setShowPropose(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setShowPropose(false)}>{t('common.cancel')}</Button>
             <Button
               onClick={handlePropose}
               disabled={
@@ -415,31 +417,31 @@ export function MultisigPage() {
                 !parseKey(proposeDestination)
               }
             >
-              {loading ? 'Enviando...' : 'Propor'}
+              {loading ? t('multisig.sending') : t('multisig.proposeShort')}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <Input
-            label="Quantidade (SOL)"
+            label={t('common.amountSol')}
             type="number"
             value={proposeAmount}
             onChange={e => setProposeAmount(e.target.value)}
             placeholder="0.00"
             step="0.001"
             min="0"
-            hint={selected ? `Disponível: ${selected.balance.toFixed(4)} SOL` : undefined}
+            hint={selected ? t('common.available', { amount: selected.balance.toFixed(4) }) : undefined}
           />
           <Input
-            label="Carteira de destino"
+            label={t('common.destinationWallet')}
             value={proposeDestination}
             onChange={e => setProposeDestination(e.target.value)}
-            placeholder="Endereço Solana"
-            error={proposeDestination && !parseKey(proposeDestination) ? 'Endereço inválido' : undefined}
+            placeholder={t('common.solanaAddress')}
+            error={proposeDestination && !parseKey(proposeDestination) ? t('common.invalidAddress') : undefined}
           />
           <p className="text-xs text-gray-500">
-            Sua aprovação conta automaticamente. Os demais signatários aprovam nesta mesma página.
+            {t('multisig.proposeNote')}
           </p>
         </div>
       </Modal>

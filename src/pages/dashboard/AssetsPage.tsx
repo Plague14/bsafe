@@ -5,10 +5,12 @@ import { useProgram, type Vault } from '../../hooks/useProgram';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { Link } from 'react-router-dom';
+import { useI18n } from '../../i18n';
 
 export function AssetsPage() {
   const { publicKey } = useWallet();
   const { getVaults, createVault, depositToVault, withdrawFromVault, loading, error } = useProgram();
+  const { t, locale } = useI18n();
 
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -105,8 +107,8 @@ export function AssetsPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vaults</h1>
-          <p className="text-gray-500">Gerencie seus cofres seguros</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('assets.title')}</h1>
+          <p className="text-gray-500">{t('assets.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -116,24 +118,24 @@ export function AssetsPage() {
             disabled={refreshing}
             icon={<RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />}
           >
-            Atualizar
+            {t('common.refresh')}
           </Button>
           <Button
             size="sm"
             onClick={() => setShowCreateModal(true)}
             icon={<Plus className="w-4 h-4" />}
           >
-            Criar Vault
+            {t('common.createVault')}
           </Button>
         </div>
       </div>
 
       {/* Total Balance */}
       <Card className="bg-gradient-to-br from-primary-600 to-primary-800 text-white border-0">
-        <p className="text-primary-200 text-sm mb-1">Saldo Total em Vaults</p>
+        <p className="text-primary-200 text-sm mb-1">{t('assets.totalBalance')}</p>
         <p className="text-3xl font-bold mb-1">{totalBalance.toFixed(4)} SOL</p>
         <p className="text-primary-200 text-sm">≈ ${(totalBalance * 150).toFixed(2)} USD</p>
-        <p className="text-primary-300 text-xs mt-2">{vaults.length} vault{vaults.length !== 1 ? 's' : ''} ativo{vaults.length !== 1 ? 's' : ''}</p>
+        <p className="text-primary-300 text-xs mt-2">{t(vaults.length === 1 ? 'assets.activeVaultsOne' : 'assets.activeVaultsMany', { count: vaults.length })}</p>
       </Card>
 
       {error && (
@@ -147,18 +149,18 @@ export function AssetsPage() {
         <Card>
           <div className="text-center py-12">
             <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum vault encontrado</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('common.noVaultTitle')}</h3>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Crie seu primeiro vault para começar a proteger seus ativos com segurança multisig e herança digital.
+              {t('assets.emptyBody')}
             </p>
             <Button onClick={() => setShowCreateModal(true)} icon={<Plus className="w-4 h-4" />}>
-              Criar Primeiro Vault
+              {t('assets.createFirst')}
             </Button>
           </div>
         </Card>
       ) : (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Seus Vaults</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('assets.yourVaults')}</h2>
           {vaults.map(vault => (
             <Card key={vault.address.toBase58()}>
               <div className="flex items-center justify-between mb-4">
@@ -200,29 +202,29 @@ export function AssetsPage() {
               {/* Vault Stats */}
               <div className="grid grid-cols-4 gap-4 py-4 border-y border-gray-100 mb-4">
                 <div>
-                  <p className="text-xs text-gray-500">Status</p>
+                  <p className="text-xs text-gray-500">{t('assets.status')}</p>
                   <p className={`text-sm font-medium ${
                     vault.status === 'active' ? 'text-green-600' :
                     vault.status === 'locked' ? 'text-yellow-600' : 'text-primary-600'
                   }`}>
-                    {vault.status === 'active' ? 'Ativo' :
-                     vault.status === 'locked' ? 'Bloqueado' : 'Herança'}
+                    {vault.status === 'active' ? t('assets.statusActive') :
+                     vault.status === 'locked' ? t('assets.statusLocked') : t('assets.statusInheritance')}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Multisig</p>
                   <p className="text-sm font-medium text-gray-900">
-                    {vault.multisigEnabled ? `${vault.multisigThreshold}/${vault.signerCount}` : 'Não'}
+                    {vault.multisigEnabled ? `${vault.multisigThreshold}/${vault.signerCount}` : t('assets.no')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Beneficiários</p>
+                  <p className="text-xs text-gray-500">{t('nav.beneficiaries')}</p>
                   <p className="text-sm font-medium text-gray-900">{vault.beneficiaryCount}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Última Atividade</p>
+                  <p className="text-xs text-gray-500">{t('assets.lastActivity')}</p>
                   <p className="text-sm font-medium text-gray-900">
-                    {new Date(vault.lastActivity).toLocaleDateString('pt-BR')}
+                    {new Date(vault.lastActivity).toLocaleDateString(locale)}
                   </p>
                 </div>
               </div>
@@ -233,7 +235,7 @@ export function AssetsPage() {
                   onClick={() => setShowDepositModal(vault)}
                   icon={<ArrowDownRight className="w-4 h-4" />}
                 >
-                  Depositar
+                  {t('assets.deposit')}
                 </Button>
                 <Button
                   size="sm"
@@ -242,7 +244,7 @@ export function AssetsPage() {
                   disabled={vault.status !== 'active'}
                   icon={<ArrowUpRight className="w-4 h-4" />}
                 >
-                  Sacar
+                  {t('assets.withdraw')}
                 </Button>
               </div>
             </Card>
@@ -254,37 +256,37 @@ export function AssetsPage() {
       <Modal
         isOpen={showCreateModal}
         onClose={() => { setShowCreateModal(false); setVaultName(''); }}
-        title="Criar Novo Vault"
+        title={t('assets.createModalTitle')}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleCreateVault}
               disabled={!vaultName.trim() || loading}
             >
-              {loading ? 'Criando...' : 'Criar Vault'}
+              {loading ? t('assets.creating') : t('common.createVault')}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <Input
-            label="Nome do Vault"
+            label={t('assets.vaultName')}
             value={vaultName}
             onChange={e => setVaultName(e.target.value)}
-            placeholder="Ex: Meu Cofre Principal"
-            hint="Máximo de 32 caracteres"
+            placeholder={t('assets.vaultNamePlaceholder')}
+            hint={t('assets.vaultNameHint')}
             maxLength={32}
           />
           <div className="p-4 bg-primary-50 rounded-lg">
-            <h4 className="font-medium text-primary-900 mb-2">O que é um Vault?</h4>
+            <h4 className="font-medium text-primary-900 mb-2">{t('assets.whatIsVault')}</h4>
             <ul className="text-sm text-primary-700 space-y-1">
-              <li>- Cofre seguro para guardar seus SOL</li>
-              <li>- Pode ser configurado com multisig</li>
-              <li>- Permite adicionar beneficiários para herança</li>
-              <li>- Protegido por smart contract na blockchain</li>
+              <li>- {t('assets.vaultPoint1')}</li>
+              <li>- {t('assets.vaultPoint2')}</li>
+              <li>- {t('assets.vaultPoint3')}</li>
+              <li>- {t('assets.vaultPoint4')}</li>
             </ul>
           </div>
         </div>
@@ -294,24 +296,24 @@ export function AssetsPage() {
       <Modal
         isOpen={!!showDepositModal}
         onClose={() => { setShowDepositModal(null); setDepositAmount(''); }}
-        title={`Depositar em ${showDepositModal?.name || 'Vault'}`}
+        title={t('assets.depositTitle', { name: showDepositModal?.name || 'Vault' })}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowDepositModal(null)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleDeposit}
               disabled={!depositAmount || parseFloat(depositAmount) <= 0 || loading}
             >
-              {loading ? 'Depositando...' : 'Depositar'}
+              {loading ? t('assets.depositing') : t('assets.deposit')}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <Input
-            label="Quantidade (SOL)"
+            label={t('common.amountSol')}
             type="number"
             value={depositAmount}
             onChange={e => setDepositAmount(e.target.value)}
@@ -322,15 +324,15 @@ export function AssetsPage() {
           {showDepositModal && (
             <div className="p-3 bg-gray-50 rounded-lg text-sm space-y-2">
               <div className="flex justify-between text-gray-600">
-                <span>Vault Treasury</span>
+                <span>{t('assets.vaultTreasury')}</span>
                 <code className="text-xs">{formatAddress(showDepositModal.treasury.toBase58())}</code>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Saldo atual</span>
+                <span>{t('assets.currentBalance')}</span>
                 <span>{showDepositModal.balance.toFixed(4)} SOL</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Taxa estimada</span>
+                <span>{t('assets.estimatedFee')}</span>
                 <span>~0.000005 SOL</span>
               </div>
             </div>
@@ -341,21 +343,21 @@ export function AssetsPage() {
       <Modal
         isOpen={!!showWithdrawModal}
         onClose={() => setShowWithdrawModal(null)}
-        title={`Sacar de ${showWithdrawModal?.name || 'Vault'}`}
+        title={t('assets.withdrawTitle', { name: showWithdrawModal?.name || 'Vault' })}
         footer={
           showWithdrawModal && requiresMultisig(showWithdrawModal) ? (
             <div className="flex gap-3 justify-end">
               <Button variant="secondary" onClick={() => setShowWithdrawModal(null)}>
-                Fechar
+                {t('common.close')}
               </Button>
               <Link to="/dashboard/multisig">
-                <Button>Ir para Multisig</Button>
+                <Button>{t('assets.goToMultisig')}</Button>
               </Link>
             </div>
           ) : (
             <div className="flex gap-3 justify-end">
               <Button variant="secondary" onClick={() => setShowWithdrawModal(null)}>
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={handleWithdraw}
@@ -366,7 +368,7 @@ export function AssetsPage() {
                   !parseDestination(withdrawDestination)
                 }
               >
-                {loading ? 'Sacando...' : 'Sacar'}
+                {loading ? t('assets.withdrawing') : t('assets.withdraw')}
               </Button>
             </div>
           )
@@ -374,35 +376,34 @@ export function AssetsPage() {
       >
         {showWithdrawModal && requiresMultisig(showWithdrawModal) ? (
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-            Este vault usa multisig ({showWithdrawModal.multisigThreshold} de {showWithdrawModal.signerCount} assinaturas).
-            Saques precisam ser propostos e aprovados pelos signatários na página Multisig.
+            {t('assets.multisigNotice', { threshold: showWithdrawModal.multisigThreshold, signers: showWithdrawModal.signerCount })}
           </div>
         ) : (
           <div className="space-y-4">
             <Input
-              label="Quantidade (SOL)"
+              label={t('common.amountSol')}
               type="number"
               value={withdrawAmount}
               onChange={e => setWithdrawAmount(e.target.value)}
               placeholder="0.00"
               step="0.001"
               min="0"
-              hint={showWithdrawModal ? `Disponível: ${showWithdrawModal.balance.toFixed(4)} SOL` : undefined}
+              hint={showWithdrawModal ? t('common.available', { amount: showWithdrawModal.balance.toFixed(4) }) : undefined}
               error={
                 parseFloat(withdrawAmount) > (showWithdrawModal?.balance ?? 0)
-                  ? 'Valor maior que o saldo do vault'
+                  ? t('assets.exceedsBalance')
                   : undefined
               }
             />
             <Input
-              label="Carteira de destino"
+              label={t('common.destinationWallet')}
               value={withdrawDestination}
               onChange={e => setWithdrawDestination(e.target.value)}
-              placeholder="Endereço Solana"
-              error={withdrawDestination && !parseDestination(withdrawDestination) ? 'Endereço inválido' : undefined}
+              placeholder={t('common.solanaAddress')}
+              error={withdrawDestination && !parseDestination(withdrawDestination) ? t('common.invalidAddress') : undefined}
             />
             <p className="text-xs text-gray-500">
-              Sacar registra atividade no vault e reinicia a contagem do deadman switch.
+              {t('assets.withdrawActivityNote')}
             </p>
           </div>
         )}

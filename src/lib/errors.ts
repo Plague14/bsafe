@@ -1,3 +1,5 @@
+import { translate, type Lang } from '../i18n';
+
 // Program error messages, generated from anchor/target/idl/bsafe.json (43 errors).
 
 export const PROGRAM_ERRORS: Record<number, string> = {
@@ -47,17 +49,15 @@ export const PROGRAM_ERRORS: Record<number, string> = {
 };
 
 /** Turns a wallet/RPC error into a readable message, decoding BSafe custom error codes. */
-export function describeError(err: unknown, fallback: string): string {
+export function describeError(err: unknown, fallback: string, lang: Lang = 'en'): string {
   const text = err instanceof Error ? err.message : String(err ?? '');
   const hex = text.match(/custom program error: 0x([0-9a-f]+)/i);
   if (hex) {
     const code = parseInt(hex[1], 16);
     if (PROGRAM_ERRORS[code]) return PROGRAM_ERRORS[code];
   }
-  if (/429|Too many requests/i.test(text)) {
-    return 'O RPC da devnet limitou as requisições (429). Tente novamente em instantes ou configure VITE_RPC_URL.';
-  }
-  if (/User rejected/i.test(text)) return 'Transação cancelada na carteira';
-  if (/insufficient (funds|lamports)/i.test(text)) return 'Saldo insuficiente para a transação';
+  if (/429|Too many requests/i.test(text)) return translate(lang, 'errors.rateLimited');
+  if (/User rejected/i.test(text)) return translate(lang, 'errors.userRejected');
+  if (/insufficient (funds|lamports)/i.test(text)) return translate(lang, 'errors.insufficientFunds');
   return text || fallback;
 }

@@ -6,13 +6,14 @@ import {
   TransactionInstruction,
   LAMPORTS_PER_SOL
 } from '@solana/web3.js';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { PROGRAM_ID } from '../lib/constants';
 import {
   findVaultPDA, findVaultTreasuryPDA, findBeneficiaryPDA, findInheritancePlanPDA, findProofPDA,
   findVerifierPDA, findSignerPDA, findMultisigTxPDA, findMembershipPDA, findBsafeTreasuryPDA, nameToBytes32,
 } from '../lib/pda';
 import { describeError } from '../lib/errors';
+import { translate, useI18n } from '../i18n';
 import { sha256 } from '@noble/hashes/sha256';
 import bs58 from 'bs58';
 
@@ -220,6 +221,10 @@ export function useProgram() {
   const wallet = useWallet();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Current UI language, read through a ref so callbacks always see the latest choice
+  const { lang } = useI18n();
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
   /** Signs and sends one BSafe instruction; returns the signature or null (error set). */
   const sendIx = useCallback(async (
@@ -229,7 +234,7 @@ export function useProgram() {
     failureMessage: string,
   ): Promise<string | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
     try {
@@ -303,7 +308,7 @@ export function useProgram() {
       return vaults;
     } catch (err) {
       console.error('Error fetching vaults:', err);
-      setError(describeError(err, 'Failed to fetch vaults'));
+      setError(describeError(err, 'Failed to fetch vaults', langRef.current));
       return [];
     } finally {
       setLoading(false);
@@ -312,7 +317,7 @@ export function useProgram() {
 
   const createVault = useCallback(async (name: string): Promise<PublicKey | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -349,7 +354,7 @@ export function useProgram() {
       return vaultPDA;
     } catch (err) {
       console.error('Failed to create vault:', err);
-      setError(describeError(err, 'Failed to create vault'));
+      setError(describeError(err, 'Failed to create vault', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -358,7 +363,7 @@ export function useProgram() {
 
   const depositToVault = useCallback(async (vault: PublicKey, amount: number): Promise<string | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -398,7 +403,7 @@ export function useProgram() {
       return signature;
     } catch (err) {
       console.error('Failed to deposit:', err);
-      setError(describeError(err, 'Failed to deposit'));
+      setError(describeError(err, 'Failed to deposit', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -427,7 +432,7 @@ export function useProgram() {
       return signature;
     } catch (err) {
       console.error('Airdrop failed:', err);
-      setError('Airdrop failed - try the web faucet');
+      setError(translate(langRef.current, 'dashboard.airdropFailed'));
       return null;
     } finally {
       setLoading(false);
@@ -470,7 +475,7 @@ export function useProgram() {
     sharePercent: number
   ): Promise<PublicKey | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -511,7 +516,7 @@ export function useProgram() {
       return beneficiaryPDA;
     } catch (err) {
       console.error('Failed to add beneficiary:', err);
-      setError(describeError(err, 'Failed to add beneficiary'));
+      setError(describeError(err, 'Failed to add beneficiary', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -585,7 +590,7 @@ export function useProgram() {
     requiredVerifications: number
   ): Promise<PublicKey | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -648,7 +653,7 @@ export function useProgram() {
       return planPDA;
     } catch (err) {
       console.error('Failed to create inheritance plan:', err);
-      setError(describeError(err, 'Failed to create inheritance plan'));
+      setError(describeError(err, 'Failed to create inheritance plan', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -661,7 +666,7 @@ export function useProgram() {
     newSharePercent: number
   ): Promise<string | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -698,7 +703,7 @@ export function useProgram() {
       return signature;
     } catch (err) {
       console.error('Failed to update shares:', err);
-      setError(describeError(err, 'Failed to update shares'));
+      setError(describeError(err, 'Failed to update shares', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -709,7 +714,7 @@ export function useProgram() {
     vault: PublicKey
   ): Promise<string | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -750,7 +755,7 @@ export function useProgram() {
       return signature;
     } catch (err) {
       console.error('Failed to initiate inheritance:', err);
-      setError(describeError(err, 'Failed to initiate inheritance'));
+      setError(describeError(err, 'Failed to initiate inheritance', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -761,7 +766,7 @@ export function useProgram() {
     vault: PublicKey
   ): Promise<string | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -799,7 +804,7 @@ export function useProgram() {
       return signature;
     } catch (err) {
       console.error('Failed to cancel inheritance:', err);
-      setError(describeError(err, 'Failed to cancel inheritance'));
+      setError(describeError(err, 'Failed to cancel inheritance', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -812,7 +817,7 @@ export function useProgram() {
     vaultOwner: PublicKey
   ): Promise<string | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
-      setError('Wallet not connected');
+      setError(translate(langRef.current, 'errors.walletNotConnected'));
       return null;
     }
 
@@ -870,7 +875,7 @@ export function useProgram() {
       return signature;
     } catch (err) {
       console.error('Failed to claim inheritance:', err);
-      setError(describeError(err, 'Failed to claim inheritance'));
+      setError(describeError(err, 'Failed to claim inheritance', langRef.current));
       return null;
     } finally {
       setLoading(false);
@@ -1010,7 +1015,7 @@ export function useProgram() {
     const [signerPDA] = findSignerPDA(vault.address, wallet.publicKey);
     const [txPDA] = findMultisigTxPDA(vault.address, vault.trackedBalanceLamports + 1n);
     if (await connection.getAccountInfo(txPDA)) {
-      setError('Já existe uma proposta para o saldo atual do vault. Execute ou rejeite a proposta pendente primeiro.');
+      setError(translate(langRef.current, 'errors.proposalExists'));
       return null;
     }
     const args = Buffer.alloc(1 + 8 + 32 + 32);
@@ -1173,7 +1178,7 @@ export function useProgram() {
       return views;
     } catch (err) {
       console.error('Error fetching inheritances:', err);
-      setError(describeError(err, 'Failed to fetch inheritances'));
+      setError(describeError(err, 'Failed to fetch inheritances', langRef.current));
       return [];
     } finally {
       setLoading(false);

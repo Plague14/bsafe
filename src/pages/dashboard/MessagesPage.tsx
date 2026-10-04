@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Video, FileText, Mic, Play, Trash2, Camera, Square, Clock } from 'lucide-react';
 import { Card, Button, Modal } from '../../components/ui';
 import { useStore } from '../../store';
+import { useI18n } from '../../i18n';
 
 export function MessagesPage() {
   const { documents, addDocument, removeDocument, beneficiaries } = useStore();
@@ -11,12 +12,13 @@ export function MessagesPage() {
   const [recording, setRecording] = useState(false);
   const [recordTime, setRecordTime] = useState(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState('all');
+  const { t, locale } = useI18n();
 
   const handleSave = () => {
     addDocument({
       id: Math.random().toString(36).slice(2),
       type: messageType,
-      title: messageType === 'text' ? 'Carta' : messageType === 'video' ? 'Vídeo' : 'Áudio',
+      title: messageType === 'text' ? t('messages.letter') : messageType === 'video' ? t('messages.video') : t('messages.audio'),
       cid: 'QmExample...',
       duration: messageType !== 'text' ? recordTime : undefined,
       size: 1024,
@@ -29,7 +31,7 @@ export function MessagesPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Excluir esta mensagem?')) removeDocument(id);
+    if (confirm(t('messages.confirmDelete'))) removeDocument(id);
   };
 
   const formatDuration = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
@@ -38,10 +40,10 @@ export function MessagesPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mensagens</h1>
-          <p className="text-gray-500">Grave mensagens para seus herdeiros</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('nav.messages')}</h1>
+          <p className="text-gray-500">{t('messages.subtitle')}</p>
         </div>
-        <Button onClick={() => setModalOpen(true)} icon={<Plus className="w-4 h-4" />}>Nova Mensagem</Button>
+        <Button onClick={() => setModalOpen(true)} icon={<Plus className="w-4 h-4" />}>{t('messages.new')}</Button>
       </div>
 
       <Card className="bg-primary-50 border-primary-100">
@@ -50,8 +52,8 @@ export function MessagesPage() {
             <Video className="w-5 h-5 text-primary-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-1">Deixe sua mensagem</h3>
-            <p className="text-sm text-gray-600">Grave um vídeo, áudio ou escreva uma carta. Essas mensagens serão reveladas apenas quando necessário.</p>
+            <h3 className="font-semibold text-gray-900 mb-1">{t('messages.leaveTitle')}</h3>
+            <p className="text-sm text-gray-600">{t('messages.leaveBody')}</p>
           </div>
         </div>
       </Card>
@@ -69,17 +71,17 @@ export function MessagesPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">
-                    {doc.type === 'video' ? 'Vídeo' : doc.type === 'audio' ? 'Áudio' : 'Carta'}
-                    {doc.forBeneficiary ? ` para ${beneficiaries.find(b => b.id === doc.forBeneficiary)?.name}` : ' para todos'}
+                    {doc.type === 'video' ? t('messages.video') : doc.type === 'audio' ? t('messages.audio') : t('messages.letter')}
+                    {doc.forBeneficiary ? ` ${t('messages.forName', { name: beneficiaries.find(b => b.id === doc.forBeneficiary)?.name ?? '' })}` : ` ${t('messages.forAll')}`}
                   </p>
                   <div className="flex items-center gap-3 text-sm text-gray-500">
                     {doc.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatDuration(doc.duration)}</span>}
-                    <span>{new Date(doc.createdAt).toLocaleDateString('pt-BR')}</span>
+                    <span>{new Date(doc.createdAt).toLocaleDateString(locale)}</span>
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="ghost" icon={<Play className="w-4 h-4" />}>Ver</Button>
+                <Button size="sm" variant="ghost" icon={<Play className="w-4 h-4" />}>{t('messages.view')}</Button>
                 <button onClick={() => handleDelete(doc.id)} className="p-2 rounded-lg text-gray-400 hover:text-error hover:bg-red-50">
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -90,27 +92,27 @@ export function MessagesPage() {
       ) : (
         <Card className="text-center py-12">
           <Video className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhuma mensagem</h3>
-          <p className="text-gray-500 mb-6">Grave uma mensagem especial para seus herdeiros</p>
-          <Button onClick={() => setModalOpen(true)} icon={<Plus className="w-4 h-4" />}>Gravar primeira mensagem</Button>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('messages.emptyTitle')}</h3>
+          <p className="text-gray-500 mb-6">{t('messages.emptyBody')}</p>
+          <Button onClick={() => setModalOpen(true)} icon={<Plus className="w-4 h-4" />}>{t('messages.recordFirst')}</Button>
         </Card>
       )}
 
       <Modal
         isOpen={modalOpen}
         onClose={() => { setModalOpen(false); setMessage(''); setRecordTime(0); }}
-        title="Nova Mensagem"
+        title={t('messages.new')}
         size="lg"
         footer={
           <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={messageType === 'text' ? !message : recordTime === 0}>Salvar</Button>
+            <Button variant="secondary" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={handleSave} disabled={messageType === 'text' ? !message : recordTime === 0}>{t('heirs.save')}</Button>
           </div>
         }
       >
         <div className="space-y-6">
           <div className="flex gap-2">
-            {[{ type: 'text', icon: FileText, label: 'Texto' }, { type: 'video', icon: Video, label: 'Vídeo' }, { type: 'audio', icon: Mic, label: 'Áudio' }].map(opt => (
+            {[{ type: 'text', icon: FileText, label: t('messages.text') }, { type: 'video', icon: Video, label: t('messages.video') }, { type: 'audio', icon: Mic, label: t('messages.audio') }].map(opt => (
               <button
                 key={opt.type}
                 onClick={() => setMessageType(opt.type as typeof messageType)}
@@ -124,22 +126,22 @@ export function MessagesPage() {
             ))}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Destinatário</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('messages.recipient')}</label>
             <select className="input" value={selectedBeneficiary} onChange={e => setSelectedBeneficiary(e.target.value)}>
-              <option value="all">Todos os herdeiros</option>
+              <option value="all">{t('messages.allHeirs')}</option>
               {beneficiaries.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           </div>
           {messageType === 'text' ? (
-            <textarea className="input min-h-[200px] resize-none" placeholder="Escreva sua mensagem..." value={message} onChange={e => setMessage(e.target.value)} />
+            <textarea className="input min-h-[200px] resize-none" placeholder={t('messages.placeholder')} value={message} onChange={e => setMessage(e.target.value)} />
           ) : (
             <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center">
               {!recording ? (
                 <>
                   <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">{messageType === 'video' ? 'Grave um vídeo' : 'Grave um áudio'}</p>
+                  <p className="text-gray-500 mb-4">{messageType === 'video' ? t('messages.recordVideo') : t('messages.recordAudio')}</p>
                   <Button onClick={() => { setRecording(true); const i = setInterval(() => setRecordTime(t => t + 1), 1000); setTimeout(() => { clearInterval(i); setRecording(false); }, 5000); }}>
-                    🔴 Iniciar Gravação
+                    🔴 {t('messages.startRecording')}
                   </Button>
                 </>
               ) : (
@@ -148,7 +150,7 @@ export function MessagesPage() {
                     <div className="w-4 h-4 bg-red-500 rounded-full" />
                   </div>
                   <p className="text-2xl font-bold text-gray-900 mb-4">{formatDuration(recordTime)}</p>
-                  <Button variant="secondary" icon={<Square className="w-4 h-4" />} onClick={() => setRecording(false)}>Parar</Button>
+                  <Button variant="secondary" icon={<Square className="w-4 h-4" />} onClick={() => setRecording(false)}>{t('messages.stop')}</Button>
                 </>
               )}
             </div>

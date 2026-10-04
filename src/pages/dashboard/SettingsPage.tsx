@@ -2,20 +2,22 @@ import { useState } from 'react';
 import { User, Shield, Bell, Eye, EyeOff, Copy, Check, Smartphone, Monitor, LogOut } from 'lucide-react';
 import { Card, Button, Input } from '../../components/ui';
 import { useStore } from '../../store';
+import { useI18n, type MessageKey } from '../../i18n';
 
-const tabs = [
-  { id: 'profile', label: 'Perfil', icon: User },
-  { id: 'security', label: 'Segurança', icon: Shield },
-  { id: 'notifications', label: 'Notificações', icon: Bell },
+const tabs: { id: string; label: MessageKey; icon: typeof User }[] = [
+  { id: 'profile', label: 'settings.profile', icon: User },
+  { id: 'security', label: 'settings.security', icon: Shield },
+  { id: 'notifications', label: 'settings.notifications', icon: Bell },
 ];
 
-const sessions = [
-  { device: 'Chrome (Windows)', location: 'São Paulo', time: 'Agora', current: true },
-  { device: 'iPhone (iOS)', location: 'São Paulo', time: '2h atrás', current: false },
+const sessions: { device: string; location: string; time: MessageKey; current: boolean }[] = [
+  { device: 'Chrome (Windows)', location: 'São Paulo', time: 'settings.sessionNow', current: true },
+  { device: 'iPhone (iOS)', location: 'São Paulo', time: 'settings.session2h', current: false },
 ];
 
 export function SettingsPage() {
   const { user } = useStore();
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('profile');
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -32,8 +34,8 @@ export function SettingsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
-        <p className="text-gray-500">Gerencie sua conta e preferências</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('nav.settings')}</h1>
+        <p className="text-gray-500">{t('settings.subtitle')}</p>
       </div>
 
       <div className="grid lg:grid-cols-4 gap-6">
@@ -48,7 +50,7 @@ export function SettingsPage() {
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
-                {tab.label}
+                {t(tab.label)}
               </button>
             ))}
           </nav>
@@ -56,35 +58,35 @@ export function SettingsPage() {
 
         <div className="lg:col-span-3 space-y-6">
           {activeTab === 'profile' && (
-            <Card header={<span className="font-semibold text-gray-900">👤 Perfil</span>}>
+            <Card header={<span className="font-semibold text-gray-900">👤 {t('settings.profile')}</span>}>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-700">
                     {form.name?.charAt(0) || 'U'}
                   </div>
-                  <Button variant="secondary" size="sm">Alterar foto</Button>
+                  <Button variant="secondary" size="sm">{t('settings.changePhoto')}</Button>
                 </div>
-                <Input label="Nome" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                <Input label={t('settings.name')} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                 <div>
                   <Input label="Email" value={form.email} disabled />
-                  <p className="text-sm text-success mt-1">✓ Verificado</p>
+                  <p className="text-sm text-success mt-1">✓ {t('settings.verified')}</p>
                 </div>
-                <Input label="Telefone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+55 11 98765-4321" />
-                <Button>Salvar Alterações</Button>
+                <Input label={t('settings.phone')} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+55 11 98765-4321" />
+                <Button>{t('settings.saveChanges')}</Button>
               </div>
             </Card>
           )}
 
           {activeTab === 'security' && (
             <>
-              <Card header={<span className="font-semibold text-gray-900">🔐 Autenticação</span>}>
+              <Card header={<span className="font-semibold text-gray-900">🔐 {t('settings.authentication')}</span>}>
                 <div className="space-y-3">
                   <label className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
                     <div className="flex items-center gap-3">
                       <input type="checkbox" checked disabled className="accent-primary-600" />
                       <div>
                         <p className="font-medium text-gray-900">Magic Link</p>
-                        <p className="text-sm text-gray-500">Login por email (ativo)</p>
+                        <p className="text-sm text-gray-500">{t('settings.magicLinkDesc')}</p>
                       </div>
                     </div>
                   </label>
@@ -92,27 +94,27 @@ export function SettingsPage() {
                     <div className="flex items-center gap-3">
                       <input type="checkbox" className="accent-primary-600" />
                       <div>
-                        <p className="font-medium text-gray-900">2FA via SMS</p>
-                        <p className="text-sm text-gray-500">Verificação por SMS</p>
+                        <p className="font-medium text-gray-900">{t('settings.sms2fa')}</p>
+                        <p className="text-sm text-gray-500">{t('settings.sms2faDesc')}</p>
                       </div>
                     </div>
-                    <Button size="sm" variant="ghost">Configurar</Button>
+                    <Button size="sm" variant="ghost">{t('dashboard.configure')}</Button>
                   </label>
                   <label className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer">
                     <div className="flex items-center gap-3">
                       <input type="checkbox" className="accent-primary-600" />
                       <div>
-                        <p className="font-medium text-gray-900">2FA via Authenticator</p>
+                        <p className="font-medium text-gray-900">{t('settings.app2fa')}</p>
                         <p className="text-sm text-gray-500">Google Authenticator, Authy</p>
                       </div>
                     </div>
-                    <Button size="sm" variant="ghost">Configurar</Button>
+                    <Button size="sm" variant="ghost">{t('dashboard.configure')}</Button>
                   </label>
                 </div>
               </Card>
 
               <Card header={<span className="font-semibold text-gray-900">🔑 Viewing Keys</span>}>
-                <p className="text-sm text-gray-500 mb-4">Sua viewing key permite acessar dados do seu cofre.</p>
+                <p className="text-sm text-gray-500 mb-4">{t('settings.viewingKeyDesc')}</p>
                 <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                   <code className="flex-1 text-sm font-mono">{showKey ? viewingKey : '••••••••••••••••••••••••••••••••'}</code>
                   <button onClick={() => setShowKey(!showKey)} className="p-2 rounded-lg hover:bg-gray-200">
@@ -123,11 +125,11 @@ export function SettingsPage() {
                   </button>
                 </div>
                 <div className="mt-4">
-                  <Button size="sm" variant="secondary">Regenerar</Button>
+                  <Button size="sm" variant="secondary">{t('settings.regenerate')}</Button>
                 </div>
               </Card>
 
-              <Card header={<span className="font-semibold text-gray-900">📱 Sessões Ativas</span>}>
+              <Card header={<span className="font-semibold text-gray-900">📱 {t('settings.activeSessions')}</span>}>
                 <div className="space-y-3">
                   {sessions.map((s, i) => (
                     <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -136,27 +138,27 @@ export function SettingsPage() {
                         <div>
                           <p className="font-medium text-gray-900">
                             {s.device}
-                            {s.current && <span className="ml-2 text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">atual</span>}
+                            {s.current && <span className="ml-2 text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">{t('settings.current')}</span>}
                           </p>
-                          <p className="text-sm text-gray-500">{s.time} • {s.location}</p>
+                          <p className="text-sm text-gray-500">{t(s.time)} • {s.location}</p>
                         </div>
                       </div>
-                      {!s.current && <Button size="sm" variant="ghost" className="text-error">Encerrar</Button>}
+                      {!s.current && <Button size="sm" variant="ghost" className="text-error">{t('settings.endSession')}</Button>}
                     </div>
                   ))}
                 </div>
-                <Button variant="ghost" className="mt-4 text-error" icon={<LogOut className="w-4 h-4" />}>Encerrar todas as outras sessões</Button>
+                <Button variant="ghost" className="mt-4 text-error" icon={<LogOut className="w-4 h-4" />}>{t('settings.endOtherSessions')}</Button>
               </Card>
             </>
           )}
 
           {activeTab === 'notifications' && (
-            <Card header={<span className="font-semibold text-gray-900">🔔 Preferências de Notificações</span>}>
+            <Card header={<span className="font-semibold text-gray-900">🔔 {t('settings.notificationPrefs')}</span>}>
               <div className="space-y-6">
                 <div>
                   <h4 className="font-medium text-gray-900 mb-3">Email</h4>
                   <div className="space-y-2">
-                    {['Depósitos e saques', 'Mudanças na herança', 'Renovações de plano', 'Newsletter (semanal)'].map((item, i) => (
+                    {[t('settings.emailDeposits'), t('settings.emailInheritance'), t('settings.emailRenewals'), t('settings.emailNewsletter')].map((item, i) => (
                       <label key={item} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                         <input type="checkbox" defaultChecked={i < 3} className="accent-primary-600" />
                         <span className="text-sm text-gray-700">{item}</span>
@@ -167,7 +169,7 @@ export function SettingsPage() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-3">Push (Browser)</h4>
                   <div className="space-y-2">
-                    {['Transações importantes', 'Todas as atividades'].map((item, i) => (
+                    {[t('settings.pushImportant'), t('settings.pushAll')].map((item, i) => (
                       <label key={item} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                         <input type="checkbox" defaultChecked={i === 0} className="accent-primary-600" />
                         <span className="text-sm text-gray-700">{item}</span>
@@ -178,7 +180,7 @@ export function SettingsPage() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-3">SMS</h4>
                   <div className="space-y-2">
-                    {['Alertas de segurança', 'Transações'].map((item, i) => (
+                    {[t('settings.smsSecurity'), t('settings.smsTransactions')].map((item, i) => (
                       <label key={item} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
                         <input type="checkbox" defaultChecked={i === 0} className="accent-primary-600" />
                         <span className="text-sm text-gray-700">{item}</span>
@@ -186,7 +188,7 @@ export function SettingsPage() {
                     ))}
                   </div>
                 </div>
-                <Button>Salvar Preferências</Button>
+                <Button>{t('settings.savePrefs')}</Button>
               </div>
             </Card>
           )}

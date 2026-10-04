@@ -3,19 +3,24 @@ import { Plus, Send, Users, MessageSquare, FileText, Wallet, RefreshCw } from 'l
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
 import { Card, Button, WalletButton } from '../../components/ui';
-import { useProgram } from '../../hooks/useProgram';
+import { useProgram, type Vault } from '../../hooks/useProgram';
+import { useI18n } from '../../i18n';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export function DashboardPage() {
   const { publicKey, connected } = useWallet();
-  const { connection } = useProgram();
+  const { connection, getVaults, getInheritancePlan } = useProgram();
+  const { t } = useI18n();
   const [balance, setBalance] = useState<number>(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [vaults, setVaults] = useState<Vault[]>([]);
+  const [plansConfigured, setPlansConfigured] = useState(0);
 
-  // Fetch balance when wallet connects
+  // Fetch balance and vault stats when wallet connects
   useEffect(() => {
     if (publicKey) {
       fetchBalance();
+      fetchStats();
     }
   }, [publicKey]);
 
@@ -31,6 +36,13 @@ export function DashboardPage() {
     setRefreshing(false);
   };
 
+  const fetchStats = async () => {
+    const fetched = await getVaults();
+    setVaults(fetched);
+    const plans = await Promise.all(fetched.map(v => getInheritancePlan(v.address)));
+    setPlansConfigured(plans.filter(Boolean).length);
+  };
+
   const handleAirdrop = async () => {
     if (!publicKey) return;
     setRefreshing(true);
@@ -41,10 +53,12 @@ export function DashboardPage() {
       await fetchBalance();
     } catch (err) {
       console.error('Airdrop failed:', err);
-      alert('Airdrop falhou - tente pelo site: https://faucet.solana.com');
+      alert(t('dashboard.airdropFailed'));
     }
     setRefreshing(false);
   };
+
+  const totalBeneficiaries = vaults.reduce((sum, v) => sum + v.beneficiaryCount, 0);
 
   // Not connected view
   if (!connected) {
@@ -53,32 +67,30 @@ export function DashboardPage() {
         <Card className="bg-gradient-to-br from-primary-600 to-primary-800 text-white border-0">
           <div className="text-center py-8">
             <Wallet className="w-16 h-16 mx-auto mb-4 text-primary-200" />
-            <h2 className="text-2xl font-bold mb-2">Conecte sua Carteira</h2>
-            <p className="text-primary-100 mb-6">
-              Para acessar o BSafe, conecte sua carteira Solana (Phantom, Solflare, etc.)
-            </p>
+            <h2 className="text-2xl font-bold mb-2">{t('dashboard.connectTitle')}</h2>
+            <p className="text-primary-100 mb-6">{t('dashboard.connectBody')}</p>
             <div className="wallet-on-blue">
               <WalletButton />
             </div>
           </div>
         </Card>
 
-        <Card header={<span className="font-semibold text-gray-900">O que é o BSafe?</span>}>
+        <Card header={<span className="font-semibold text-gray-900">{t('dashboard.whatIs')}</span>}>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="p-4 bg-primary-50 rounded-lg">
               <div className="text-2xl mb-2">🔐</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Multisig Seguro</h3>
-              <p className="text-sm text-gray-600">Múltiplas assinaturas para proteger seus ativos</p>
+              <h3 className="font-semibold text-gray-900 mb-1">{t('dashboard.featMultisigTitle')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.featMultisigBody')}</p>
             </div>
             <div className="p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl mb-2">📜</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Herança Digital</h3>
-              <p className="text-sm text-gray-600">Transfira seus ativos automaticamente para herdeiros</p>
+              <h3 className="font-semibold text-gray-900 mb-1">{t('dashboard.featInheritanceTitle')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.featInheritanceBody')}</p>
             </div>
             <div className="p-4 bg-primary-50 rounded-lg">
               <div className="text-2xl mb-2">⏰</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Deadman Switch</h3>
-              <p className="text-sm text-gray-600">Ativação automática por inatividade</p>
+              <h3 className="font-semibold text-gray-900 mb-1">{t('dashboard.featDeadmanTitle')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.featDeadmanBody')}</p>
             </div>
           </div>
         </Card>
@@ -91,7 +103,7 @@ export function DashboardPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('nav.dashboard')}</h1>
           <p className="text-gray-500 font-mono text-sm">
             {publicKey?.toBase58().slice(0, 8)}...{publicKey?.toBase58().slice(-8)}
           </p>
@@ -107,12 +119,12 @@ export function DashboardPage() {
       <Card className="bg-gradient-to-br from-primary-600 to-primary-800 text-white border-0">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-primary-200 text-sm mb-1">Saldo da Carteira</p>
+            <p className="text-primary-200 text-sm mb-1">{t('dashboard.walletBalance')}</p>
             <p className="text-4xl font-bold mb-1">{balance.toFixed(4)} SOL</p>
             <p className="text-primary-200 text-sm">≈ ${(balance * 150).toFixed(2)} USD</p>
           </div>
           <button
-            onClick={fetchBalance}
+            onClick={() => { fetchBalance(); fetchStats(); }}
             disabled={refreshing}
             className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
           >
@@ -127,11 +139,11 @@ export function DashboardPage() {
             onClick={handleAirdrop}
             disabled={refreshing}
           >
-            Airdrop (Devnet)
+            {t('dashboard.airdrop')}
           </Button>
           <Link to="/dashboard/assets">
             <Button size="sm" className="bg-white/20 hover:bg-white/30 border-0" icon={<Send className="w-4 h-4" />}>
-              Criar Vault
+              {t('common.createVault')}
             </Button>
           </Link>
         </div>
@@ -145,8 +157,8 @@ export function DashboardPage() {
               <Wallet className="w-6 h-6 text-primary-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Vaults Ativos</p>
-              <p className="text-2xl font-bold text-gray-900">0</p>
+              <p className="text-sm text-gray-500">{t('dashboard.activeVaults')}</p>
+              <p className="text-2xl font-bold text-gray-900">{vaults.length}</p>
             </div>
           </div>
         </Card>
@@ -156,8 +168,8 @@ export function DashboardPage() {
               <Users className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Beneficiários</p>
-              <p className="text-2xl font-bold text-gray-900">0</p>
+              <p className="text-sm text-gray-500">{t('dashboard.beneficiaries')}</p>
+              <p className="text-2xl font-bold text-gray-900">{totalBeneficiaries}</p>
             </div>
           </div>
         </Card>
@@ -167,8 +179,12 @@ export function DashboardPage() {
               <FileText className="w-6 h-6 text-primary-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Plano de Herança</p>
-              <p className="text-2xl font-bold text-gray-900">Não configurado</p>
+              <p className="text-sm text-gray-500">{t('nav.plans')}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {plansConfigured > 0
+                  ? t('dashboard.plansConfigured', { count: plansConfigured, total: vaults.length })
+                  : t('dashboard.notConfigured')}
+              </p>
             </div>
           </div>
         </Card>
@@ -176,17 +192,17 @@ export function DashboardPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Create Vault CTA */}
-        <Card header={<span className="font-semibold text-gray-900">Criar Vault</span>}>
+        <Card header={<span className="font-semibold text-gray-900">{t('common.createVault')}</span>}>
           <div className="text-center py-6">
             <div className="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center">
               <Plus className="w-8 h-8 text-primary-600" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Crie seu primeiro Vault</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Um vault é um cofre seguro para guardar seus SOL com proteção multisig e herança digital.
-            </p>
+            <h3 className="font-semibold text-gray-900 mb-2">
+              {vaults.length > 0 ? t('dashboard.anotherVaultTitle') : t('dashboard.firstVaultTitle')}
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">{t('dashboard.vaultExplainer')}</p>
             <Link to="/dashboard/assets">
-              <Button icon={<Plus className="w-4 h-4" />}>Criar Vault</Button>
+              <Button icon={<Plus className="w-4 h-4" />}>{t('common.createVault')}</Button>
             </Link>
           </div>
         </Card>
@@ -194,20 +210,22 @@ export function DashboardPage() {
         {/* Beneficiaries Preview */}
         <Card header={
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-gray-900">Beneficiários</span>
+            <span className="font-semibold text-gray-900">{t('dashboard.beneficiaries')}</span>
             <Link to="/dashboard/beneficiaries" className="text-sm text-primary-600 hover:underline">
-              Configurar
+              {t('dashboard.configure')}
             </Link>
           </div>
         }>
           <div className="text-center py-6">
             <Users className="w-10 h-10 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-500 mb-4">
-              Adicione beneficiários após criar um vault
+              {vaults.length > 0
+                ? t('dashboard.heirsAcrossVaults', { count: totalBeneficiaries })
+                : t('dashboard.addHeirsAfterVault')}
             </p>
             <Link to="/dashboard/beneficiaries">
               <Button size="sm" variant="secondary" icon={<Users className="w-4 h-4" />}>
-                Ver Beneficiários
+                {t('dashboard.viewBeneficiaries')}
               </Button>
             </Link>
           </div>
@@ -215,13 +233,13 @@ export function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <Card header={<span className="font-semibold text-gray-900">Ações Rápidas</span>}>
+      <Card header={<span className="font-semibold text-gray-900">{t('dashboard.quickActions')}</span>}>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { to: '/dashboard/assets', icon: Plus, label: 'Criar Vault', color: 'text-primary-600' },
-            { to: '/dashboard/beneficiaries', icon: Users, label: 'Gerenciar Herdeiros', color: 'text-blue-600' },
-            { to: '/dashboard/plans', icon: FileText, label: 'Plano de Herança', color: 'text-primary-600' },
-            { to: '/dashboard/settings', icon: MessageSquare, label: 'Configurações', color: 'text-gray-600' },
+            { to: '/dashboard/assets', icon: Plus, label: t('common.createVault'), color: 'text-primary-600' },
+            { to: '/dashboard/beneficiaries', icon: Users, label: t('dashboard.manageHeirs'), color: 'text-blue-600' },
+            { to: '/dashboard/plans', icon: FileText, label: t('nav.plans'), color: 'text-primary-600' },
+            { to: '/dashboard/settings', icon: MessageSquare, label: t('nav.settings'), color: 'text-gray-600' },
           ].map(action => (
             <Link
               key={action.to}
@@ -240,7 +258,7 @@ export function DashboardPage() {
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary-500"></div>
-            <span className="text-gray-500">Conectado à Solana Devnet</span>
+            <span className="text-gray-500">{t('dashboard.connectedDevnet')}</span>
           </div>
           <span className="font-mono text-gray-400">
             Program: 3a7Yvu...mp3Kv

@@ -1,21 +1,23 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Users, Wallet, MessageSquare, CreditCard, Settings, X, LogOut, KeyRound, Gift } from 'lucide-react';
 import { useStore } from '../../store';
+import { useI18n, type MessageKey } from '../../i18n';
 import clsx from 'clsx';
 
-const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { to: '/dashboard/beneficiaries', icon: Users, label: 'Herdeiros' },
-  { to: '/dashboard/assets', icon: Wallet, label: 'Ativos' },
-  { to: '/dashboard/messages', icon: MessageSquare, label: 'Mensagens' },
-  { to: '/dashboard/plans', icon: CreditCard, label: 'Plano de Herança' },
-  { to: '/dashboard/multisig', icon: KeyRound, label: 'Multisig' },
-  { to: '/dashboard/inheritances', icon: Gift, label: 'Minhas Heranças' },
-  { to: '/dashboard/settings', icon: Settings, label: 'Configurações' },
+const navItems: { to: string; icon: typeof Users; label: MessageKey; end?: boolean }[] = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'nav.dashboard', end: true },
+  { to: '/dashboard/beneficiaries', icon: Users, label: 'nav.beneficiaries' },
+  { to: '/dashboard/assets', icon: Wallet, label: 'nav.assets' },
+  { to: '/dashboard/messages', icon: MessageSquare, label: 'nav.messages' },
+  { to: '/dashboard/plans', icon: CreditCard, label: 'nav.plans' },
+  { to: '/dashboard/multisig', icon: KeyRound, label: 'nav.multisig' },
+  { to: '/dashboard/inheritances', icon: Gift, label: 'nav.inheritances' },
+  { to: '/dashboard/settings', icon: Settings, label: 'nav.settings' },
 ];
 
 export function Sidebar() {
   const { sidebarOpen, toggleSidebar, logout } = useStore();
+  const { t } = useI18n();
 
   return (
     <>
@@ -47,7 +49,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="w-5 h-5" />
-              {label}
+              {t(label)}
             </NavLink>
           ))}
         </nav>
@@ -57,7 +59,7 @@ export function Sidebar() {
             className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            Sair
+            {t('nav.logout')}
           </button>
         </div>
       </aside>

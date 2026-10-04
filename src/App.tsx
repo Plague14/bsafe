@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { WalletProvider } from './contexts/WalletProvider';
+import { I18nProvider } from './i18n';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
@@ -15,6 +16,7 @@ import { InheritancesPage } from './pages/dashboard/InheritancesPage';
 
 export default function App() {
   return (
+    <I18nProvider>
     <WalletProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
@@ -40,5 +42,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </WalletProvider>
+    </I18nProvider>
   );
 }
