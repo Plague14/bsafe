@@ -6,6 +6,7 @@ import { useProgram, type Vault, type InheritancePlan, type TriggerType, type Be
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { useI18n } from '../../i18n';
+import { DEMO_TIMERS, COOLDOWN_RANGE, DEADMAN_RANGE } from '../../lib/constants';
 
 export function PlansPage() {
   const { publicKey } = useWallet();
@@ -37,12 +38,15 @@ export function PlansPage() {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Units are days, or minutes in the devnet demo build (see DEMO_TIMERS)
   const [form, setForm] = useState({
-    triggerType: 'both' as TriggerType,
-    cooldownDays: 30,
-    deadmanSwitchDays: 365,
-    requiredVerifications: 2,
+    triggerType: (DEMO_TIMERS ? 'deadmanSwitch' : 'both') as TriggerType,
+    cooldownDays: COOLDOWN_RANGE.default,
+    deadmanSwitchDays: DEADMAN_RANGE.default,
+    requiredVerifications: DEMO_TIMERS ? 1 : 2,
   });
+  const unitLabel = (count: number) =>
+    DEMO_TIMERS ? t('plans.minutes', { count }) : t(count > 1 ? 'plans.days' : 'plans.day', { count });
 
   // Fetch vaults on mount
   useEffect(() => {
@@ -163,6 +167,7 @@ export function PlansPage() {
   };
 
   const formatDays = (seconds: number) => {
+    if (seconds < 24 * 60 * 60) return t('plans.minutes', { count: Math.round(seconds / 60) });
     const days = Math.floor(seconds / (24 * 60 * 60));
     if (days >= 365) {
       const years = Math.floor(days / 365);
@@ -179,8 +184,11 @@ export function PlansPage() {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
+    const minutes = Math.ceil((diff % (1000 * 60 * 60)) / (1000 * 60));
+
     if (days > 0) return t('plans.remainingDays', { days, hours });
-    return t('plans.remainingHours', { hours });
+    if (hours > 0) return t('plans.remainingHours', { hours });
+    return t('plans.remainingMinutes', { minutes });
   };
 
   const getTriggerTypeLabel = (type: TriggerType) => {
@@ -693,6 +701,11 @@ export function PlansPage() {
         }
       >
         <div className="space-y-4">
+          {DEMO_TIMERS && (
+            <p className="text-xs text-primary-800 bg-primary-50 border border-primary-100 rounded-lg p-3">
+              {t('plans.demoTimersNotice')}
+            </p>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               {t('plans.triggerType')}
@@ -713,19 +726,19 @@ export function PlansPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              {t('plans.cooldownLabel', { days: form.cooldownDays })}
+              {t('plans.cooldownLabelUnit', { value: unitLabel(form.cooldownDays) })}
             </label>
             <input
               type="range"
-              min={1}
-              max={365}
+              min={COOLDOWN_RANGE.min}
+              max={COOLDOWN_RANGE.max}
               value={form.cooldownDays}
               onChange={(e) => setForm({ ...form, cooldownDays: Number(e.target.value) })}
               className="w-full accent-primary-600"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>{t('plans.day', { count: 1 })}</span>
-              <span>{t('plans.days', { count: 365 })}</span>
+              <span>{unitLabel(COOLDOWN_RANGE.min)}</span>
+              <span>{unitLabel(COOLDOWN_RANGE.max)}</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {t('plans.cooldownHint')}
@@ -735,19 +748,19 @@ export function PlansPage() {
           {form.triggerType !== 'deathCertificate' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                {t('plans.deadmanLabel', { days: form.deadmanSwitchDays })}
+                {t('plans.deadmanLabelUnit', { value: unitLabel(form.deadmanSwitchDays) })}
               </label>
               <input
                 type="range"
-                min={30}
-                max={1825}
+                min={DEADMAN_RANGE.min}
+                max={DEADMAN_RANGE.max}
                 value={form.deadmanSwitchDays}
                 onChange={(e) => setForm({ ...form, deadmanSwitchDays: Number(e.target.value) })}
                 className="w-full accent-primary-600"
               />
               <div className="flex justify-between text-xs text-gray-500">
-                <span>{t('plans.days', { count: 30 })}</span>
-                <span>{t('plans.years', { count: 5 })}</span>
+                <span>{unitLabel(DEADMAN_RANGE.min)}</span>
+                <span>{DEMO_TIMERS ? unitLabel(DEADMAN_RANGE.max) : t('plans.years', { count: 5 })}</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {t('plans.deadmanHint')}

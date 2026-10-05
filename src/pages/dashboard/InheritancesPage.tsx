@@ -18,8 +18,9 @@ async function hashFile(file: File): Promise<Uint8Array> {
 
 const toHex = (bytes: Uint8Array) => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 
-function formatRemaining(ms: number, nowLabel: string): string {
+function formatRemaining(ms: number, nowLabel: string, underMinuteLabel: string): string {
   if (ms <= 0) return nowLabel;
+  if (ms < 60_000) return underMinuteLabel;
   const days = Math.floor(ms / 86_400_000);
   const hours = Math.floor((ms % 86_400_000) / 3_600_000);
   const minutes = Math.floor((ms % 3_600_000) / 60_000);
@@ -67,6 +68,7 @@ export function InheritancesPage() {
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
+    setNow(Date.now());
     setViews(await getMyInheritances());
     setRefreshing(false);
   }, [getMyInheritances]);
@@ -75,9 +77,9 @@ export function InheritancesPage() {
     if (publicKey) refresh();
   }, [publicKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Tick every 30s so countdowns stay current
+  // Tick every 5s so countdowns (minutes on the devnet demo build) stay current
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000);
+    const id = setInterval(() => setNow(Date.now()), 5_000);
     return () => clearInterval(id);
   }, []);
 
@@ -221,7 +223,7 @@ export function InheritancesPage() {
                       <div className="p-3 bg-gray-50 rounded-lg">
                         <p className="text-xs text-gray-500">Deadman switch</p>
                         <p className="font-medium text-gray-900">
-                          {deadmanReached ? t('inheritances.deadlineReached') : t('inheritances.firesIn', { time: formatRemaining(deadmanAt - now, t('inheritances.now')) })}
+                          {deadmanReached ? t('inheritances.deadlineReached') : t('inheritances.firesIn', { time: formatRemaining(deadmanAt - now, t('inheritances.now'), t('inheritances.underMinute')) })}
                         </p>
                       </div>
                     )}
@@ -230,7 +232,7 @@ export function InheritancesPage() {
                         <p className="text-xs text-gray-500">Cooldown</p>
                         <p className="font-medium text-gray-900 flex items-center gap-1">
                           <Timer className="w-4 h-4" />
-                          {cooldownOver ? t('inheritances.ended') : t('inheritances.endsIn', { time: formatRemaining(plan.cooldownEndsAt - now, t('inheritances.now')) })}
+                          {cooldownOver ? t('inheritances.ended') : t('inheritances.endsIn', { time: formatRemaining(plan.cooldownEndsAt - now, t('inheritances.now'), t('inheritances.underMinute')) })}
                         </p>
                       </div>
                     )}

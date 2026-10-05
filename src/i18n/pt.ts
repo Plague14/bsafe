@@ -329,6 +329,11 @@ export const pt: Messages = {
     addVerifier: "Adicionar verificador",
     verifierWallet: "Carteira do verificador",
     verifierNote: "O verificador vê a certidão pendente em \"Minhas Heranças\" e confirma on-chain.",
+    minutes: "{count} min",
+    remainingMinutes: "{minutes} min restantes",
+    cooldownLabelUnit: "Período de Cooldown: {value}",
+    deadmanLabelUnit: "Deadman Switch: {value}",
+    demoTimersNotice: "Versão de demonstração na devnet: os prazos contam em minutos em vez de dias, para mostrar o fluxo completo ao vivo. Em produção os mínimos são 1 dia (cooldown) e 30 dias (deadman switch).",
   },
   multisig: {
     statusPending: "Pendente",
@@ -403,6 +408,7 @@ export const pt: Messages = {
     documentMatches: "O documento confere com o hash registrado on-chain.",
     documentMismatch: "Atenção: o documento NÃO confere com o hash registrado on-chain.",
     cooldownNote: "Durante o cooldown o dono pode cancelar a herança se estiver vivo. O resgate libera ao final.",
+    underMinute: "< 1 min",
   },
   messages: {
     letter: "Carta",

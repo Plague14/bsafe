@@ -16,8 +16,9 @@ export const WalletProvider: FC<Props> = ({ children }) => {
     () => [
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
-      // In-browser throwaway keypair for local testing only; never shipped in production builds
-      ...(import.meta.env.DEV ? [new UnsafeBurnerWalletAdapter()] : []),
+      // In-browser throwaway keypair for local testing only. Production builds include it only
+      // when VITE_TEST_WALLET=true is set at build time (local test builds; never on Vercel).
+      ...(import.meta.env.DEV || import.meta.env.VITE_TEST_WALLET === 'true' ? [new UnsafeBurnerWalletAdapter()] : []),
     ],
     []
   );

@@ -327,6 +327,11 @@ export const en = {
     addVerifier: "Add verifier",
     verifierWallet: "Verifier wallet",
     verifierNote: "The verifier sees the pending certificate under \"My Inheritances\" and confirms it on-chain.",
+    minutes: "{count} min",
+    remainingMinutes: "{minutes} min left",
+    cooldownLabelUnit: "Cooldown Period: {value}",
+    deadmanLabelUnit: "Deadman Switch: {value}",
+    demoTimersNotice: "Devnet demo build: timers run in minutes instead of days so the whole flow can be shown live. Production minimums are 1 day (cooldown) and 30 days (deadman switch).",
   },
   multisig: {
     statusPending: "Pending",
@@ -401,6 +406,7 @@ export const en = {
     documentMatches: "The document matches the hash recorded on-chain.",
     documentMismatch: "Warning: the document does NOT match the hash recorded on-chain.",
     cooldownNote: "During the cooldown the owner can cancel the inheritance if they're alive. Claiming opens when it ends.",
+    underMinute: "< 1 min",
   },
   messages: {
     letter: "Letter",

@@ -7,7 +7,7 @@ import {
   LAMPORTS_PER_SOL
 } from '@solana/web3.js';
 import { useCallback, useRef, useState } from 'react';
-import { PROGRAM_ID } from '../lib/constants';
+import { PROGRAM_ID, TIMER_UNIT_SECONDS } from '../lib/constants';
 import {
   findVaultPDA, findVaultTreasuryPDA, findBeneficiaryPDA, findInheritancePlanPDA, findProofPDA,
   findVerifierPDA, findSignerPDA, findMultisigTxPDA, findMembershipPDA, findBsafeTreasuryPDA, nameToBytes32,
@@ -585,8 +585,8 @@ export function useProgram() {
   const createInheritancePlan = useCallback(async (
     vault: PublicKey,
     triggerType: TriggerType,
-    cooldownDays: number,
-    deadmanSwitchDays: number,
+    cooldownUnits: number,
+    deadmanSwitchUnits: number,
     requiredVerifications: number
   ): Promise<PublicKey | null> => {
     if (!wallet.publicKey || !wallet.signTransaction) {
@@ -600,9 +600,9 @@ export function useProgram() {
 
       const [planPDA] = findInheritancePlanPDA(vault);
 
-      // Convert to seconds
-      const cooldownSeconds = cooldownDays * 24 * 60 * 60;
-      const deadmanSwitchSeconds = deadmanSwitchDays * 24 * 60 * 60;
+      // Convert form units (days, or minutes in demo builds) to seconds
+      const cooldownSeconds = cooldownUnits * TIMER_UNIT_SECONDS;
+      const deadmanSwitchSeconds = deadmanSwitchUnits * TIMER_UNIT_SECONDS;
 
       // Build instruction data
       const discriminator = getInstructionDiscriminator('create_inheritance_plan');

@@ -45,3 +45,4 @@ Thumbs.db
 
 # Local Claude rules - do not push to GitHub
 CLAUDE.md
+dist-test

@@ -14,6 +14,8 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
+# Devnet demo build: timer minimums in minutes instead of days (see create_plan.rs)
+demo-timers = []
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 
 [dependencies]

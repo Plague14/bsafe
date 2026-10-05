@@ -329,3 +329,50 @@ fn multisig_withdrawal_requires_threshold() {
         "ThresholdNotReached",
     );
 }
+
+/// Which program build the suite runs against: `BSAFE_DEMO_TIMERS=1` for the devnet demo build.
+fn demo_build() -> bool {
+    std::env::var("BSAFE_DEMO_TIMERS").map_or(false, |v| v == "1")
+}
+
+#[test]
+fn timer_minimums_match_the_build() {
+    let Setup { mut env, owner, vault } = setup_vault(1);
+    let heir = env.funded(1);
+    env.ok(&[add_beneficiary(&vault, &owner.pubkey(), &heir.pubkey(), 10_000)], &[&owner]);
+    let short = create_inheritance_plan(&vault, &owner.pubkey(), TriggerType::DeadmanSwitch, 60, 120, 1);
+    if demo_build() {
+        env.ok(&[short], &[&owner]);
+    } else {
+        // Production build: minutes-long timers are rejected (minimums are 1 day / 30 days)
+        env.fails_with(&[short], &[&owner], "InvalidCooldownPeriod");
+    }
+}
+
+#[test]
+fn demo_timers_full_deadman_flow_in_minutes() {
+    if !demo_build() {
+        return; // only meaningful against the devnet demo build
+    }
+    let Setup { mut env, owner, vault } = setup_vault(1);
+    let heir = env.funded(1);
+    env.ok(&[add_beneficiary(&vault, &owner.pubkey(), &heir.pubkey(), 10_000)], &[&owner]);
+    let admin = env.funded(1);
+    env.ok(&[initialize_treasury(&admin.pubkey())], &[&admin]);
+    env.ok(
+        &[create_inheritance_plan(&vault, &owner.pubkey(), TriggerType::DeadmanSwitch, 60, 120, 1)],
+        &[&owner],
+    );
+
+    env.warp_forward(60);
+    env.fails_with(&[initiate_inheritance(&vault, &heir.pubkey(), false)], &[&heir], "OwnerStillActive");
+    env.warp_forward(61);
+    env.ok(&[initiate_inheritance(&vault, &heir.pubkey(), false)], &[&heir]);
+
+    env.fails_with(&[claim_inheritance(&vault, &heir.pubkey())], &[&heir], "CooldownNotComplete");
+    env.warp_forward(61);
+    let before = env.balance(&heir.pubkey());
+    env.ok(&[claim_inheritance(&vault, &heir.pubkey())], &[&heir]);
+    assert!(env.balance(&heir.pubkey()) > before);
+    assert_eq!(env.balance(&vault_treasury_pda(&vault)), 0);
+}

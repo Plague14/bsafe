@@ -16,5 +16,6 @@ set PATH=Z:\HD_1\DFK\BSafe\solana-install\solana-release\bin;Z:\HD_1\DFK\BSafe\m
 cd /d Z:\HD_1\DFK\BSafe\bsafe-clean\bsafe-clean\anchor
 rem Anchor 0.30.1's IDL step is broken on current Rust; build the .so here and
 rem generate the IDL with scripts\build-idl.py instead.
-anchor build --no-idl || exit /b 1
+rem Extra arguments go to cargo, e.g. "build.bat -- --features demo-timers" for the devnet demo build
+anchor build --no-idl %* || exit /b 1
 python scripts\build-idl.py || exit /b 1

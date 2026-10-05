@@ -2,6 +2,20 @@ use anchor_lang::prelude::*;
 use crate::state::{Vault, InheritancePlan, InheritanceStatus, TriggerType, VaultStatus};
 use crate::errors::BsafeError;
 
+/// Timer bounds. The `demo-timers` feature (devnet demo build only) shortens the minimums to
+/// minutes so the whole inheritance flow can be shown live; the default build keeps days.
+#[cfg(not(feature = "demo-timers"))]
+pub const MIN_COOLDOWN_SECONDS: u64 = 24 * 60 * 60; // 1 day
+#[cfg(feature = "demo-timers")]
+pub const MIN_COOLDOWN_SECONDS: u64 = 60; // 1 minute
+pub const MAX_COOLDOWN_SECONDS: u64 = 365 * 24 * 60 * 60; // 365 days
+
+#[cfg(not(feature = "demo-timers"))]
+pub const MIN_DEADMAN_SECONDS: u64 = 30 * 24 * 60 * 60; // 30 days
+#[cfg(feature = "demo-timers")]
+pub const MIN_DEADMAN_SECONDS: u64 = 2 * 60; // 2 minutes
+pub const MAX_DEADMAN_SECONDS: u64 = 5 * 365 * 24 * 60 * 60; // 5 years
+
 #[derive(Accounts)]
 pub struct CreateInheritancePlan<'info> {
     #[account(
@@ -49,17 +63,15 @@ pub fn create_inheritance_plan(
         BsafeError::InvalidShareSum
     );
 
-    // Validate cooldown (minimum 1 day, maximum 365 days)
+    // Validate cooldown (default: 1 day to 365 days)
     require!(
-        cooldown_seconds >= 86400 && cooldown_seconds <= 31536000,
+        cooldown_seconds >= MIN_COOLDOWN_SECONDS && cooldown_seconds <= MAX_COOLDOWN_SECONDS,
         BsafeError::InvalidCooldownPeriod
     );
 
-    // Validate deadman switch (minimum 30 days, maximum 5 years)
-    let min_deadman = 30 * 24 * 60 * 60; // 30 days
-    let max_deadman = 5 * 365 * 24 * 60 * 60; // 5 years
+    // Validate deadman switch (default: 30 days to 5 years)
     require!(
-        deadman_switch_seconds >= min_deadman && deadman_switch_seconds <= max_deadman,
+        deadman_switch_seconds >= MIN_DEADMAN_SECONDS && deadman_switch_seconds <= MAX_DEADMAN_SECONDS,
         BsafeError::InvalidCooldownPeriod
     );
 
