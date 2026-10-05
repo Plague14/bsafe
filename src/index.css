@@ -127,3 +127,54 @@ html { scroll-behavior: smooth; }
 .wallet-adapter-modal .wallet-adapter-modal-overlay {
   background: rgba(10, 31, 68, 0.4);
 }
+
+/* Larger wallet button for hero/CTA, matching the size="lg" buttons next to it */
+.wallet-lg .wallet-adapter-button.wallet-adapter-button-trigger {
+  height: 3.5rem;
+  padding: 0 2rem;
+  font-size: 1rem;
+  border-radius: 0.625rem;
+}
+
+/* ---------- Landing page motion (all disabled under prefers-reduced-motion) ---------- */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.reveal.is-visible { opacity: 1; transform: none; }
+
+.text-gradient-brand {
+  background: linear-gradient(100deg, var(--color-primary-700), var(--color-primary-500) 45%, #0891b2 90%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 8s ease-in-out infinite alternate;
+}
+@keyframes gradient-pan { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+
+.landing-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(37, 99, 235, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.float-slow { animation: float-y 6s ease-in-out infinite; }
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+.pulse-dot { position: relative; }
+.pulse-dot::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 9999px;
+  border: 2px solid var(--color-primary-500); animation: pulse-ring 1.8s ease-out infinite;
+}
+@keyframes pulse-ring { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(1.8); opacity: 0; } }
+
+.dash-flow { stroke-dasharray: 6 6; animation: dash-flow 1.2s linear infinite; }
+@keyframes dash-flow { to { stroke-dashoffset: -24; } }
+
+.caret::after { content: '▍'; margin-left: 1px; animation: caret-blink 1s steps(1) infinite; color: var(--color-primary-600); }
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .text-gradient-brand, .float-slow, .pulse-dot::after, .dash-flow, .caret::after { animation: none; }
+}
