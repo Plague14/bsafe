@@ -58,6 +58,7 @@ export function describeError(err: unknown, lang: Lang): string {
     if (PROGRAM_ERRORS[code]) return PROGRAM_ERRORS[code];
   }
   if (/429|Too many requests/i.test(text)) return translate(lang, 'errors.rateLimited');
+  if (/Blockhash not found|block height exceeded|fetch failed|Network request failed|UnknownHost/i.test(text)) return translate(lang, 'errors.network');
   if (/declined|rejected|cancel/i.test(text)) return translate(lang, 'errors.userRejected');
   if (/insufficient (funds|lamports)/i.test(text)) return translate(lang, 'errors.insufficientFunds');
   return text || translate(lang, 'errors.generic');

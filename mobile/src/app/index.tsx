@@ -17,7 +17,7 @@ export default function Welcome() {
   if (restoring) {
     return <View style={s.center}><ActivityIndicator color={colors.primary} /></View>;
   }
-  if (publicKey) return <Redirect href="/(tabs)" />;
+  if (publicKey) return <Redirect href="/vaults" />;
 
   const onConnect = async () => {
     setConnecting(true);

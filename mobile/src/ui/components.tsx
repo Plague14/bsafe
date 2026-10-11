@@ -197,8 +197,9 @@ export function Address({ value, chars = 4, style, light }: { value: string; cha
 
 export function Sheet({ visible, title, onClose, children }: { visible: boolean; title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={s.sheetWrap}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      {/* Android draws edge-to-edge, so the window no longer resizes for the keyboard: pad on both platforms */}
+      <KeyboardAvoidingView behavior="padding" style={s.sheetWrap}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={s.sheet}>
           <View style={s.sheetHandle} />

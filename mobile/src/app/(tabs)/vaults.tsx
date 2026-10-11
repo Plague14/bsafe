@@ -1,5 +1,6 @@
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useI18n } from '../../i18n';
 import { describeError } from '../../lib/errors';
@@ -41,7 +42,8 @@ export default function VaultsScreen() {
     setBalance((await connection.getBalance(publicKey).catch(() => 0)) / LAMPORTS_PER_SOL);
   }, [connection, publicKey]);
 
-  useEffect(() => { loadBalance(); }, [loadBalance]);
+  // Reload whenever the tab gains focus so balances reflect claims and deposits made elsewhere
+  useFocusEffect(useCallback(() => { loadBalance(); refresh(); }, [loadBalance, refresh]));
 
   const refreshAll = useCallback(async () => {
     await Promise.all([refresh(), loadBalance()]);

@@ -182,6 +182,7 @@ export const en = {
   },
   errors: {
     generic: 'Something went wrong',
+    network: 'The network did not respond in time. Check your connection and try again.',
     rateLimited: 'The RPC is rate-limiting requests. Wait a few seconds and try again.',
     userRejected: 'Request cancelled in the wallet.',
     insufficientFunds: 'Not enough SOL to pay for this transaction.',

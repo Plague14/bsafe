@@ -1,11 +1,24 @@
 import type { TransactionInstruction } from '@solana/web3.js';
 import * as Linking from 'expo-linking';
 import { useCallback, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import { explorerTx } from '../lib/config';
 import { describeError } from '../lib/errors';
 import { useI18n } from '../i18n';
 import { useWallet } from './WalletContext';
+
+/** Alerts raised while the wallet app is in front are dropped by Android: wait until BSafe is visible again. */
+function whenActive(): Promise<void> {
+  if (AppState.currentState === 'active') return Promise.resolve();
+  return new Promise(resolve => {
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        sub.remove();
+        resolve();
+      }
+    });
+  });
+}
 
 type Build = () => TransactionInstruction | TransactionInstruction[] | Promise<TransactionInstruction | TransactionInstruction[]>;
 
@@ -24,6 +37,7 @@ export function useAction() {
       const built = await build();
       const signature = await send(Array.isArray(built) ? built : [built]);
       await onDone?.();
+      await whenActive();
       Alert.alert(t('common.done'), undefined, [
         { text: t('common.viewTx'), onPress: () => Linking.openURL(explorerTx(signature)) },
         { text: 'OK' },
@@ -31,6 +45,7 @@ export function useAction() {
       return signature;
     } catch (err) {
       console.warn(`[bsafe] ${key} failed`, err);
+      await whenActive();
       Alert.alert(t('errors.generic'), describeError(err, lang));
       return null;
     } finally {

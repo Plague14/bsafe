@@ -27,8 +27,20 @@ const WalletContext = createContext<WalletValue | null>(null);
 
 const toPublicKey = (base64Address: string) => new PublicKey(Buffer.from(base64Address, 'base64'));
 
+/** fetch that retries network-level failures (flaky mobile data, DNS hiccups) before giving up. */
+const retryingFetch = async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetch(input, init);
+    } catch (err) {
+      if (attempt >= 3) throw err;
+      await new Promise(resolve => setTimeout(resolve, 600 * (attempt + 1)));
+    }
+  }
+};
+
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const connection = useMemo(() => new Connection(RPC_ENDPOINT, 'confirmed'), []);
+  const connection = useMemo(() => new Connection(RPC_ENDPOINT, { commitment: 'confirmed', fetch: retryingFetch as typeof fetch }), []);
   const [auth, setAuth] = useState<StoredAuth | null>(null);
   const [restoring, setRestoring] = useState(true);
 
@@ -75,15 +87,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [auth, saveAuth]);
 
   const send = useCallback(async (instructions: TransactionInstruction[]) => {
+    // Fetch the blockhash while BSafe is still in the foreground; once the wallet opens, Android may throttle our network
+    const latest = await connection.getLatestBlockhash();
     const signed = await transact(async wallet => {
       const current = await authorize(wallet, auth?.authToken);
-      const latest = await connection.getLatestBlockhash();
       const tx = new Transaction({ feePayer: new PublicKey(current.address), ...latest }).add(...instructions);
       const [result] = await wallet.signTransactions({ transactions: [tx] });
-      return { result, latest };
+      return { result };
     });
-    const signature = await connection.sendRawTransaction(signed.result.serialize());
-    const confirmation = await connection.confirmTransaction({ signature, ...signed.latest }, 'confirmed');
+    const raw = signed.result.serialize();
+    const submit = () => connection.sendRawTransaction(raw, { preflightCommitment: 'confirmed', maxRetries: 5 });
+    let signature: string;
+    try {
+      signature = await submit();
+    } catch (err) {
+      // Load-balanced RPCs can simulate on a node that hasn't seen our blockhash yet; it is still valid, so retry once
+      if (!/Blockhash not found/i.test(String((err as Error)?.message ?? err))) throw err;
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      signature = await submit();
+    }
+    const confirmation = await connection.confirmTransaction({ signature, ...latest }, 'confirmed');
     if (confirmation.value.err) throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
     return signature;
   }, [auth, authorize, connection]);

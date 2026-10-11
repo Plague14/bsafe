@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { PublicKey } from '@solana/web3.js';
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useI18n } from '../../i18n';
 import { getBeneficiaries, ixs, type Beneficiary } from '../../lib/program';
@@ -34,7 +35,8 @@ export default function HeirsScreen() {
     }
   }, [connection, selected]);
 
-  useEffect(() => { load(); }, [load]);
+  // Reload whenever the tab gains focus so changes made elsewhere (claims, other tabs) show up
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   if (!publicKey) return null;
   const me = publicKey;

@@ -184,6 +184,7 @@ export const pt: Messages = {
   },
   errors: {
     generic: 'Algo deu errado',
+    network: 'A rede não respondeu a tempo. Confira sua conexão e tente de novo.',
     rateLimited: 'O RPC está limitando requisições. Espere alguns segundos e tente de novo.',
     userRejected: 'Pedido cancelado na carteira.',
     insufficientFunds: 'SOL insuficiente para pagar esta transação.',

@@ -1,4 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useI18n, type MessageKey } from '../../i18n';
@@ -61,7 +62,8 @@ export default function PlanScreen() {
     }
   }, [connection, selected]);
 
-  useEffect(() => { load(); }, [load]);
+  // Reload whenever the tab gains focus so changes made elsewhere (claims, other tabs) show up
+  useFocusEffect(useCallback(() => { load(); }, [load]));
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 5000);
     return () => clearInterval(id);

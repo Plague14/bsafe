@@ -24,7 +24,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: icon('wallet-outline') }} />
+      <Tabs.Screen name="vaults" options={{ title: t('tabs.home'), tabBarIcon: icon('wallet-outline') }} />
       <Tabs.Screen name="heirs" options={{ title: t('tabs.heirs'), tabBarIcon: icon('people-outline') }} />
       <Tabs.Screen name="plan" options={{ title: t('tabs.plan'), tabBarIcon: icon('shield-checkmark-outline') }} />
       <Tabs.Screen name="inheritances" options={{ title: t('tabs.inheritances'), tabBarIcon: icon('gift-outline') }} />

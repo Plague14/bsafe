@@ -3,6 +3,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { Buffer } from 'buffer';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useI18n, type MessageKey } from '../../i18n';
@@ -60,7 +61,8 @@ export default function InheritancesScreen() {
     }
   }, [connection, publicKey]);
 
-  useEffect(() => { load(); }, [load]);
+  // Reload whenever the tab gains focus so changes made elsewhere (claims, other tabs) show up
+  useFocusEffect(useCallback(() => { load(); }, [load]));
   // Tick every 5s so countdowns (minutes on the devnet demo build) stay current
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 5000);
