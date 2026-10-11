@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use crate::errors::BsafeError;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum BeneficiaryStatus {
@@ -58,7 +59,11 @@ impl Beneficiary {
         32;  // reserved
 
     /// Calculate the amount this beneficiary should receive based on share
-    pub fn calculate_share(&self, total_amount: u64) -> u64 {
-        ((total_amount as u128) * (self.share_bps as u128) / 10000) as u64
+    pub fn calculate_share(&self, total_amount: u64) -> Result<u64> {
+        let share = (total_amount as u128)
+            .checked_mul(self.share_bps as u128)
+            .ok_or(BsafeError::ArithmeticOverflow)?
+            / 10000;
+        u64::try_from(share).map_err(|_| BsafeError::ArithmeticOverflow.into())
     }
 }

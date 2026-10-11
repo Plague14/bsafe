@@ -39,7 +39,7 @@ pub fn approve_transaction(ctx: Context<ApproveTransaction>) -> Result<()> {
     );
 
     // Add approval
-    transaction.add_approval(signer.index);
+    transaction.add_approval(signer.index)?;
 
     msg!(
         "Transaction approved by {}. Approvals: {}/{}",

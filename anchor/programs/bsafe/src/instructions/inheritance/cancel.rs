@@ -48,7 +48,8 @@ pub fn cancel_inheritance(ctx: Context<CancelInheritance>) -> Result<()> {
     let proof = ctx.accounts.proof.to_account_info();
     if proof.owner == ctx.program_id && proof.lamports() > 0 {
         let owner = ctx.accounts.owner.to_account_info();
-        **owner.try_borrow_mut_lamports()? += proof.lamports();
+        let refunded = owner.lamports().checked_add(proof.lamports()).ok_or(BsafeError::ArithmeticOverflow)?;
+        **owner.try_borrow_mut_lamports()? = refunded;
         **proof.try_borrow_mut_lamports()? = 0;
         proof.assign(&anchor_lang::system_program::ID);
         proof.realloc(0, false)?;

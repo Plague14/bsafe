@@ -49,8 +49,8 @@ pub fn verify_death_certificate(ctx: Context<VerifyDeathCertificate>) -> Result<
     verifier_account.verified_at = clock.unix_timestamp;
 
     // Increment verification counts
-    proof.verification_count += 1;
-    plan.current_verifications += 1;
+    proof.verification_count = proof.verification_count.checked_add(1).ok_or(BsafeError::ArithmeticOverflow)?;
+    plan.current_verifications = plan.current_verifications.checked_add(1).ok_or(BsafeError::ArithmeticOverflow)?;
 
     msg!(
         "Verification {} of {} received from {}",

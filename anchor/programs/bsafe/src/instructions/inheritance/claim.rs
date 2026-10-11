@@ -78,7 +78,7 @@ pub fn claim_inheritance(ctx: Context<ClaimInheritance>) -> Result<()> {
     }
 
     // Calculate claim amount
-    let mut gross_claim_amount = beneficiary.calculate_share(plan.distribution_amount);
+    let mut gross_claim_amount = beneficiary.calculate_share(plan.distribution_amount)?;
 
     require!(gross_claim_amount > 0, BsafeError::InsufficientFunds);
 
@@ -88,7 +88,7 @@ pub fn claim_inheritance(ctx: Context<ClaimInheritance>) -> Result<()> {
 
     // Share rounding can leave dust in the treasury. The runtime rejects leaving
     // a non-zero balance below the rent-exempt minimum, so sweep it into this claim.
-    let remaining = treasury_balance - gross_claim_amount;
+    let remaining = treasury_balance.checked_sub(gross_claim_amount).ok_or(BsafeError::ArithmeticOverflow)?;
     if remaining > 0 && remaining < Rent::get()?.minimum_balance(0) {
         gross_claim_amount = treasury_balance;
     }

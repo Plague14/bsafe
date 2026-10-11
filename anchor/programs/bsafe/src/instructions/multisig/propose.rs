@@ -28,7 +28,8 @@ pub struct ProposeTransaction<'info> {
         seeds = [
             b"multisig_tx",
             vault.key().as_ref(),
-            &(vault.balance + 1).to_le_bytes() // Use balance+1 as a simple nonce
+            // Use balance+1 as a simple nonce (saturates instead of wrapping at u64::MAX)
+            &vault.balance.saturating_add(1).to_le_bytes()
         ],
         bump
     )]
@@ -60,7 +61,7 @@ pub fn propose_transaction(
 
     // Initialize transaction
     transaction.vault = vault.key();
-    transaction.seq_number = clock.unix_timestamp as u64; // Simple sequence
+    transaction.seq_number = u64::try_from(clock.unix_timestamp).map_err(|_| BsafeError::ArithmeticOverflow)?; // Simple sequence
     transaction.tx_type = tx_type;
     transaction.status = TransactionStatus::Pending;
     transaction.amount = amount;
@@ -69,6 +70,7 @@ pub fn propose_transaction(
     transaction.proposer = ctx.accounts.proposer.key();
     transaction.threshold = vault.multisig_threshold;
     transaction.approval_count = 1; // Proposer automatically approves
+    require!(signer.index < 64, BsafeError::MaxSignersReached);
     transaction.approvals = 1u64 << signer.index; // Mark proposer as approved
     transaction.proposed_at = clock.unix_timestamp;
     transaction.executed_at = 0;

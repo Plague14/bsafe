@@ -54,7 +54,7 @@ pub fn add_beneficiary(ctx: Context<AddBeneficiary>, wallet: Pubkey, share_bps: 
     beneficiary.bump = ctx.bumps.beneficiary;
 
     // Update vault
-    vault.beneficiary_count += 1;
+    vault.beneficiary_count = vault.beneficiary_count.checked_add(1).ok_or(BsafeError::ArithmeticOverflow)?;
     vault.total_share_bps = new_total;
     vault.update_activity();
 

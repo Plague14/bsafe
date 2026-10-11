@@ -33,6 +33,7 @@ pub fn initiate_inheritance(ctx: Context<InitiateInheritance>) -> Result<()> {
     let vault = &mut ctx.accounts.vault;
     let plan = &mut ctx.accounts.inheritance_plan;
     let clock = Clock::get()?;
+    let deadman_seconds = i64::try_from(plan.deadman_switch_seconds).map_err(|_| BsafeError::ArithmeticOverflow)?;
 
     // Ensure inheritance hasn't already been triggered
     require!(
@@ -55,9 +56,9 @@ pub fn initiate_inheritance(ctx: Context<InitiateInheritance>) -> Result<()> {
         }
         TriggerType::DeadmanSwitch => {
             // Check if owner has been inactive long enough
-            let inactivity_duration = clock.unix_timestamp - vault.last_activity;
+            let inactivity_duration = clock.unix_timestamp.checked_sub(vault.last_activity).ok_or(BsafeError::ArithmeticOverflow)?;
             require!(
-                inactivity_duration >= plan.deadman_switch_seconds as i64,
+                inactivity_duration >= deadman_seconds,
                 BsafeError::OwnerStillActive
             );
             trigger_valid = true;
@@ -69,14 +70,14 @@ pub fn initiate_inheritance(ctx: Context<InitiateInheritance>) -> Result<()> {
                     trigger_valid = true;
                 } else {
                     // Check deadman switch
-                    let inactivity_duration = clock.unix_timestamp - vault.last_activity;
-                    trigger_valid = inactivity_duration >= plan.deadman_switch_seconds as i64;
+                    let inactivity_duration = clock.unix_timestamp.checked_sub(vault.last_activity).ok_or(BsafeError::ArithmeticOverflow)?;
+                    trigger_valid = inactivity_duration >= deadman_seconds;
                 }
             } else {
                 // Check deadman switch
-                let inactivity_duration = clock.unix_timestamp - vault.last_activity;
+                let inactivity_duration = clock.unix_timestamp.checked_sub(vault.last_activity).ok_or(BsafeError::ArithmeticOverflow)?;
                 require!(
-                    inactivity_duration >= plan.deadman_switch_seconds as i64,
+                    inactivity_duration >= deadman_seconds,
                     BsafeError::OwnerStillActive
                 );
                 trigger_valid = true;
@@ -92,7 +93,8 @@ pub fn initiate_inheritance(ctx: Context<InitiateInheritance>) -> Result<()> {
     // Update inheritance plan
     plan.status = InheritanceStatus::CooldownActive;
     plan.triggered_at = clock.unix_timestamp;
-    plan.cooldown_ends_at = clock.unix_timestamp + plan.cooldown_seconds as i64;
+    let cooldown_seconds = i64::try_from(plan.cooldown_seconds).map_err(|_| BsafeError::ArithmeticOverflow)?;
+    plan.cooldown_ends_at = clock.unix_timestamp.checked_add(cooldown_seconds).ok_or(BsafeError::ArithmeticOverflow)?;
     plan.distribution_amount = treasury_balance;
 
     // Lock the vault

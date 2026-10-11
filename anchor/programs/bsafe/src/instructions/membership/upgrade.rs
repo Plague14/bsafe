@@ -80,7 +80,7 @@ pub fn upgrade_membership(
 
     // Set expiration for Concierge (1 year)
     if target_tier == MembershipTier::Concierge {
-        membership.expires_at = clock.unix_timestamp + (365 * 24 * 60 * 60);
+        membership.expires_at = clock.unix_timestamp.checked_add(365 * 24 * 60 * 60).ok_or(BsafeError::ArithmeticOverflow)?;
     } else {
         membership.expires_at = 0; // Premium never expires (one-time payment)
     }

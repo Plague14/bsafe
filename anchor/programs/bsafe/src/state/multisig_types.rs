@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use crate::errors::BsafeError;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
 pub enum TransactionStatus {
@@ -138,11 +139,11 @@ impl MultisigTransaction {
     }
 
     /// Record an approval from a signer
-    pub fn add_approval(&mut self, signer_index: u8) {
-        if signer_index < 64 {
-            self.approvals |= 1u64 << signer_index;
-            self.approval_count += 1;
-        }
+    pub fn add_approval(&mut self, signer_index: u8) -> Result<()> {
+        require!(signer_index < 64, BsafeError::MaxSignersReached);
+        self.approvals |= 1u64 << signer_index;
+        self.approval_count = self.approval_count.checked_add(1).ok_or(BsafeError::ArithmeticOverflow)?;
+        Ok(())
     }
 
     /// Check if threshold has been reached
