@@ -1,0 +1,10 @@
+{
+  "network": "sepolia",
+  "contract": "0x5f13f2fd32b77f938bde11362cc7cee0499f0aee5562e54a2bfc8b5a0145a5",
+  "classHash": "0x6b2d6c63f44ee87ca3832145597ae9ac1166fe2a64a0d787713511594d93540",
+  "deployTx": "0xf36a4fe9140e5ca48762febbbd1ef55c8e9a1bbf561b87c79a77e740fe48a7",
+  "admin": "0x626b17b1d329f43aa47e7eedab28323708c167305418a9a41dffdbb74dad218",
+  "paymentToken": "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+  "demoMode": true,
+  "deployedAt": "2026-10-15T11:53:01.859Z"
+}

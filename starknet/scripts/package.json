@@ -1,0 +1,17 @@
+{
+  "name": "bsafe-starknet-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "account": "node account.mjs",
+    "deploy": "node deploy.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "starknet": "^10.8.0"
+  },
+  "type": "module",
+  "private": true
+}

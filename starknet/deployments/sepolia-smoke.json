@@ -1,0 +1,16 @@
+{
+  "network": "sepolia",
+  "contract": "0x5f13f2fd32b77f938bde11362cc7cee0499f0aee5562e54a2bfc8b5a0145a5",
+  "vaultId": "1",
+  "owner": "0x626b17b1d329f43aa47e7eedab28323708c167305418a9a41dffdbb74dad218",
+  "heir": "0x4eb7b19ed58009ad9d3120fe6a7634583adbabcc84bbac32f3c1b42a8dcb3f",
+  "txs": {
+    "fundHeir": "0x765c9ce1d2c6cd1b330dac6c68c5de1d724a0e72a66aaec8c2df661b67734b6",
+    "deployHeir": "0x483a921dcb5d1f2fab776117b08b336775c7650ee52a9be2e0f66a0850068f2",
+    "createVault": "0x683f3d9e8dd31a44f4217829e4b3d2a6c0eeedc72d2808c0f6d4d5b422a38ce",
+    "setup": "0x3416d9b9aa9facec718078d03c6b0bb4a6f104eb833e9f77a89041b72a7274a",
+    "initiate": "0x67a2a18c242c010762e7f02111ef8dbeb49264a99e817fb95461f2c9d4f5229",
+    "claim": "0x434e93951a18e3b840614e705f30607fd66303d1e6bde25c30b8ce9f1a4516b"
+  },
+  "ranAt": "2026-10-15T11:58:56.486Z"
+}
