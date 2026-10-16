@@ -51,4 +51,15 @@ node deploy.mjs         # demo timers; add --prod for production minimums
 node smoke.mjs          # end-to-end inheritance on the deployed contract
 ```
 
-Set `STARKNET_RPC_URL` to use another Sepolia RPC.
+Set `STARKNET_RPC_URL` to use another Sepolia RPC (declares need one without a small
+request-size limit; dRPC works).
+
+## Web app
+
+The main site serves the Starknet version at `/starknet` (`src/pages/starknet`, loaded on
+demand). It connects Ready (Argent X) or Braavos and covers vaults, deposits (approve +
+deposit in one multicall), heirs, plans, verifiers, the cancel window and claims, in
+English and Portuguese.
+
+For UI testing without a browser extension, `scripts/dev-signer.mjs` signs on localhost
+with the test keys in `.env` for a fake injected wallet, so keys never reach the page.

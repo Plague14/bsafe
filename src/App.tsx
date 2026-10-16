@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { WalletProvider } from './contexts/WalletProvider';
 import { I18nProvider } from './i18n';
@@ -13,6 +14,9 @@ import { PlansPage } from './pages/dashboard/PlansPage';
 import { SettingsPage } from './pages/dashboard/SettingsPage';
 import { MultisigPage } from './pages/dashboard/MultisigPage';
 import { InheritancesPage } from './pages/dashboard/InheritancesPage';
+
+// Starknet version: loaded on demand so starknet.js stays out of the Solana bundle
+const StarknetApp = lazy(() => import('./pages/starknet/StarknetApp'));
 
 export default function App() {
   return (
@@ -37,6 +41,15 @@ export default function App() {
             <Route path="inheritances" element={<InheritancesPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
+
+          <Route
+            path="/starknet"
+            element={
+              <Suspense fallback={null}>
+                <StarknetApp />
+              </Suspense>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -126,6 +126,7 @@ export function LandingPage() {
             <a href="https://github.com/Plague14/bsafe" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">GitHub</a>
             <a href="https://github.com/Plague14/bsafe/blob/master/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Docs</a>
             <a href="https://explorer.solana.com/address/3a7Yvu89jRSMLDQJnLVepCNLENjckrK1ntQznChmp3Kv?cluster=devnet" target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">Explorer</a>
+            <Link to="/starknet" className="hover:text-primary-600 transition-colors">Starknet</Link>
           </div>
           <p className="text-sm text-gray-500">{t('landing.builtFor')}</p>
         </div>

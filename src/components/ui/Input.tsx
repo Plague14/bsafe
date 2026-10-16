@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import clsx from 'clsx';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -8,17 +8,20 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: ReactNode;
 }
 
-export function Input({ label, error, hint, icon, className, ...props }: InputProps) {
+export function Input({ label, error, hint, icon, className, id, ...props }: InputProps) {
+  const autoId = useId();
+  const inputId = id ?? autoId;
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">{label}</label>
       )}
       <div className="relative">
         {icon && (
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</span>
         )}
         <input
+          id={inputId}
           className={clsx('input', icon && 'pl-10', error && 'input-error', className)}
           {...props}
         />
